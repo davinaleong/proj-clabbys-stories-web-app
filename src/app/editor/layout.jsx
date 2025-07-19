@@ -2,7 +2,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { env } from "./../lib/env"
+import { env } from "../lib/env"
 
 // Assets
 import whiteLogo from "./../assets/logos/logo-white.png"
