@@ -1,4 +1,5 @@
 "use client"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState } from "react"
 import { validatePassword } from "./lib/password-check"
@@ -7,6 +8,8 @@ import logo from "./assets/logos/logo-midnight.png"
 export default function LoginPage() {
   const [pin, setPin] = useState("")
   const [status, setStatus] = useState("")
+
+  const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,6 +20,7 @@ export default function LoginPage() {
     if (isValid) {
       setStatus("✅ Access Granted")
       // redirect or load the protected page
+      router.push("/editor")
     } else {
       setStatus("❌ Invalid PIN")
     }

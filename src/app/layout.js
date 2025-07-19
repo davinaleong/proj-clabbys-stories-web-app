@@ -1,4 +1,5 @@
 import { Montserrat, Playfair } from "next/font/google"
+import { env } from "./lib/env"
 import "./globals.css"
 
 const montserrat = Montserrat({
@@ -12,7 +13,7 @@ const playfair = Playfair({
 })
 
 export const metadata = {
-  title: "Clabby's Stories - Editor",
+  title: env.APP_NAME,
   description: "An editor for Clabby's Stories",
 }
 

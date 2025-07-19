@@ -1,4 +1,5 @@
 export const env = {
+  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "Clabby's Stories Editor",
   APP_ENV: process.env.NEXT_PUBLIC_APP_ENV || "development",
   API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/graphql",
   UPLOAD_URL:
