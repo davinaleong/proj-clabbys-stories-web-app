@@ -1,22 +1,35 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Pastel Pink Shades */
+  --color-pastel-pink-50: #ffffff;
+  --color-pastel-pink-100: #fff6f6;
+  --color-pastel-pink-200: #ffebec;
+  --color-pastel-pink-300: #ffe0e1;
+  --color-pastel-pink-400: #ffd5d6;
+  --color-pastel-pink-500: #ffdbdc;
+  --color-pastel-pink-600: #e5c5c6;
+  --color-pastel-pink-700: #ccb0b1;
+  --color-pastel-pink-800: #b39a9b;
+  --color-pastel-pink-900: #998485;
+  --color-pastel-pink-950: #8c7475;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Carbon Blue Shades */
+  --color-carbon-blue-50: #383870;
+  --color-carbon-blue-100: #333366;
+  --color-carbon-blue-200: #2e2e5c;
+  --color-carbon-blue-300: #292952;
+  --color-carbon-blue-400: #242448;
+  --color-carbon-blue-500: #1c1c4a;
+  --color-carbon-blue-600: #191942;
+  --color-carbon-blue-700: #151538;
+  --color-carbon-blue-800: #11112e;
+  --color-carbon-blue-900: #0e0e24;
+  --color-carbon-blue-950: #0b0b1e;
+
+  /* Fonts */
+  --font-sans: var(--font-montserrat);
+  --font-serif: var(--font-playfair);
 }
 
 body {
