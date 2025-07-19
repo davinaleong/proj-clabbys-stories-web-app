@@ -1,0 +1,13 @@
+#import "../fragments/photoFields.gql"
+
+mutation CreatePhoto($data: CreatePhotoInput!) {
+  createPhoto(data: $data) {
+    ...PhotoFields
+  }
+}
+
+mutation CreatePhotosBatch($data: CreatePhotoBatchInput!) {
+  createPhotos(data: $data) {
+    ...PhotoFields
+  }
+}

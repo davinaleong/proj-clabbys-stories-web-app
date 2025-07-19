@@ -1,0 +1,17 @@
+#import "../fragments/userFields.gql"
+
+query GetUsers {
+  users {
+    ...UserFields
+  }
+}
+
+query GetUser($id: ID!) {
+  user(id: $id) {
+    ...UserFields
+    galleries {
+      id
+      title
+    }
+  }
+}

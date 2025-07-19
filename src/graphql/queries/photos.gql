@@ -1,0 +1,22 @@
+#import "../fragments/photoFields.gql"
+#import "../fragments/pageInfo.gql"
+
+query GetPhotos($galleryId: ID!) {
+  photos(galleryId: $galleryId) {
+    ...PhotoFields
+  }
+}
+
+query GetPhotosPaginated($galleryId: ID!, $after: String, $first: Int = 10) {
+  photosPaginated(galleryId: $galleryId, after: $after, first: $first) {
+    edges {
+      cursor
+      node {
+        ...PhotoFields
+      }
+    }
+    pageInfo {
+      ...PageInfoFields
+    }
+  }
+}

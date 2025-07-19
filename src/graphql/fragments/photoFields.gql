@@ -1,0 +1,12 @@
+fragment PhotoFields on Photo {
+  id
+  title
+  description
+  imageUrl
+  thumbUrl
+  caption
+  takenAt
+  galleryId
+  createdAt
+  updatedAt
+}

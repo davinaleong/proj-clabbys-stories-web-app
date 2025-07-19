@@ -1,0 +1,21 @@
+query GetAppSettings {
+  appSettings {
+    id
+    applicationName
+    lightboxMode
+    defaultSortOrder
+    createdAt
+    updatedAt
+  }
+}
+
+query GetAppSetting($id: ID!) {
+  appSetting(id: $id) {
+    id
+    applicationName
+    lightboxMode
+    defaultSortOrder
+    createdAt
+    updatedAt
+  }
+}

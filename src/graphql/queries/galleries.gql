@@ -1,0 +1,32 @@
+#import "../fragments/galleryFields.gql"
+#import "../fragments/pageInfo.gql"
+
+query GetGalleries($userId: ID) {
+  galleries(userId: $userId) {
+    ...GalleryFields
+  }
+}
+
+query GetGallery($id: ID!) {
+  gallery(id: $id) {
+    ...GalleryFields
+    photos {
+      id
+      imageUrl
+    }
+  }
+}
+
+query GetGalleriesPaginated($userId: ID, $after: String, $first: Int = 10) {
+  galleriesPaginated(userId: $userId, after: $after, first: $first) {
+    edges {
+      cursor
+      node {
+        ...GalleryFields
+      }
+    }
+    pageInfo {
+      ...PageInfoFields
+    }
+  }
+}
