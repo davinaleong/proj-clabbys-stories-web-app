@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 // ✅ Utilities
-import { formatDate } from "../../utils/format-date"
+import { formatDate } from "../utils/format-date"
 
 // ✅ GalleryCard
 import GalleryCard from "./../components/GalleryCard"

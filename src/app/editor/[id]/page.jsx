@@ -2,7 +2,7 @@
 import { useParams } from "next/navigation"
 import { gql, useQuery, useMutation } from "@apollo/client"
 import Image from "next/image"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   DndContext,
   closestCenter,
@@ -17,9 +17,10 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { formatDate } from "../../../utils/format-date"
+import { formatDate } from "../../utils/format-date"
 import checkIcon from "./../../assets/icons/check.svg"
-import Toast from "../../components/Toast"
+import Toast from "./../../components/Toast"
+import DatePicker from "./../../components/DatePicker"
 
 // ✅ Queries
 const GET_GALLERY = gql`
@@ -81,13 +82,20 @@ export default function GalleryPage() {
     "No description provided."
   )
   const [editedDate, setEditedDate] = useState("No date is set")
+  const [isoDateValue, setIsoDateValue] = useState(null) // store ISO for saving
+
   const [actualPassphrase, setActualPassphrase] = useState("Set a passphrase")
   const maskedPassphrase = actualPassphrase.replace(/./g, "*")
+
   const [photos, setPhotos] = useState([])
 
   // ✅ Toast state
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState("success")
+
+  // ✅ Date Picker open/close
+  const [isPickerOpen, setPickerOpen] = useState(false)
+  const dateFieldRef = useRef(null)
 
   useEffect(() => {
     if (data?.gallery) {
@@ -98,9 +106,11 @@ export default function GalleryPage() {
 
       if (!g.date || Number(g.date) < 0) {
         setEditedDate("No date is set")
+        setIsoDateValue(null)
       } else {
         const parsedDate = new Date(Number(g.date))
-        setEditedDate(formatDate(parsedDate.toISOString(), "EEEE_DD_MMM_YYYY"))
+        setIsoDateValue(parsedDate.toISOString())
+        setEditedDate(formatDate(parsedDate.toISOString(), "EEEE_D_MMM_YYYY"))
       }
 
       setActualPassphrase("")
@@ -117,9 +127,8 @@ export default function GalleryPage() {
 
   const validateForm = () => {
     if (!editedTitle.trim()) return "Title cannot be empty."
-    if (editedDate.trim()) {
-      const testDate = Date.parse(editedDate.trim())
-      if (isNaN(testDate)) return "Please enter a valid date format."
+    if (isoDateValue && isNaN(new Date(isoDateValue))) {
+      return "Please select a valid date."
     }
     if (actualPassphrase && actualPassphrase.length < 4) {
       return "Passphrase must be at least 4 characters."
@@ -149,30 +158,23 @@ export default function GalleryPage() {
     }
 
     try {
-      // ✅ Convert human-readable date back to ISO
-      const parsedDate = editedDate.trim() ? new Date(editedDate) : null
-      const isoDate =
-        parsedDate && !isNaN(parsedDate) ? parsedDate.toISOString() : null
-
-      // ✅ 1. Save gallery details
       await updateGalleryMutation({
         variables: {
           id: galleryId,
           data: {
             title: editedTitle,
             description: editedDescription,
-            date: isoDate, // <-- ISO format
+            date: isoDateValue || null, // ✅ already ISO from picker
             passphrase: actualPassphrase || undefined,
           },
         },
       })
 
-      // ✅ 2. Save photo order
+      // ✅ Save photo order...
       const updates = photos.map((p, index) => ({
         photoId: p.id,
         position: index,
       }))
-
       await updatePhotoOrderMutation({ variables: { updates } })
 
       setToastType("success")
@@ -222,7 +224,7 @@ export default function GalleryPage() {
         </h1>
 
         <button
-          className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md hover:bg-carbon-blue-500"
+          className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-carbon-blue-500"
           onClick={handleSave}
         >
           <Image src={checkIcon} alt="Check Icon" width={16} height={16} /> Save
@@ -240,17 +242,32 @@ export default function GalleryPage() {
           {editedDescription}
         </p>
 
-        <p
-          className="text-gray-700 outline-none"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => setEditedDate(e.currentTarget.textContent)}
-        >
-          {editedDate}
-        </p>
+        {/* ✅ Clickable Date Field */}
+        <div className="relative inline-block mt-2">
+          <p
+            ref={dateFieldRef}
+            className="text-gray-800 outline-none"
+            onClick={() => setPickerOpen((prev) => !prev)}
+          >
+            {editedDate || "No date is set"}
+          </p>
 
+          {/* ✅ Floating Date Picker Menu */}
+          <DatePicker
+            anchorRef={dateFieldRef}
+            isOpen={isPickerOpen}
+            onClose={() => setPickerOpen(false)}
+            outputFormat="EEEE_DD_MMM_YYYY"
+            onDateSelected={({ formatted, iso }) => {
+              setEditedDate(formatted) // ✅ show pretty date
+              setIsoDateValue(iso) // ✅ store ISO for saving
+            }}
+          />
+        </div>
+
+        {/* ✅ Passphrase */}
         <p
-          className="text-gray-700 outline-none"
+          className="mt-2 text-gray-700 outline-none"
           contentEditable
           suppressContentEditableWarning
           onFocus={(e) => (e.currentTarget.textContent = maskedPassphrase)}
@@ -280,7 +297,7 @@ export default function GalleryPage() {
       </section>
 
       {/* ✅ Photos with drag-and-drop */}
-      <section>
+      <section className="mt-6">
         <h2 className="text-lg font-semibold text-carbon-blue-700 mb-4 sr-only">
           Photos
         </h2>

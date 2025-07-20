@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image"
 import Link from "next/link"
-import { formatDate } from "../../utils/format-date"
+import { formatDate } from "../utils/format-date"
 
 import imagePlaceholder from "./../assets/images/placeholder-cbs.png"
 
