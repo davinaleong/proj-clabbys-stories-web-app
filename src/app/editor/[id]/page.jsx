@@ -30,7 +30,7 @@ const GET_GALLERY = gql`
       title
       description
       date
-      passphraseHash
+      status
       createdAt
       photos {
         id
@@ -51,6 +51,7 @@ const UPDATE_GALLERY = gql`
       title
       description
       date
+      status
     }
   }
 `
@@ -86,6 +87,8 @@ export default function GalleryPage() {
 
   const [actualPassphrase, setActualPassphrase] = useState("Set a passphrase")
   const maskedPassphrase = actualPassphrase.replace(/./g, "*")
+
+  const [editedStatus, setEditedStatus] = useState("DRAFT")
 
   const [photos, setPhotos] = useState([])
 
@@ -160,17 +163,35 @@ export default function GalleryPage() {
     }
 
     try {
-      // ✅ Save gallery
+      // ✅ Convert date to ISO
+      let isoDate = null
+      if (editedDate && editedDate !== "No date is set") {
+        const parsed = dayjs(editedDate, [
+          "dddd, D MMM YYYY",
+          "ddd, D MMM YYYY",
+          "D MMM YYYY",
+          "D MMMM YYYY",
+        ])
+        if (parsed.isValid()) {
+          isoDate = parsed.toISOString()
+        }
+      }
+
+      // ✅ Build mutation payload
+      const updateData = {
+        title: editedTitle,
+        description: editedDescription,
+        date: isoDate, // backend expects ISO
+      }
+
+      // ✅ Only include passphrase if user actually edited it
+      if (actualPassphrase && actualPassphrase !== "Set a passphrase") {
+        updateData.passphrase = actualPassphrase
+      }
+
+      // ✅ Save gallery details (title, desc, date, passphraseHash)
       await updateGalleryMutation({
-        variables: {
-          id: galleryId,
-          data: {
-            title: editedTitle,
-            description: editedDescription,
-            date: isoDateValue,
-            passphrase: actualPassphrase || undefined,
-          },
-        },
+        variables: { id: galleryId, data: updateData },
       })
 
       // ✅ Save photo order
@@ -180,9 +201,8 @@ export default function GalleryPage() {
       }))
       await updatePhotoOrderMutation({ variables: { updates } })
 
-      // ✅ Trigger success toast
       setToastType("success")
-      setToastMessage("✅ Gallery details & photo order saved!")
+      setToastMessage("✅ Gallery details, passphrase & photo order saved!")
     } catch (err) {
       console.error("Save failed:", err)
       setToastType("error")
@@ -247,7 +267,7 @@ export default function GalleryPage() {
         </p>
 
         {/* ✅ Clickable Date Field */}
-        <div className="relative inline-block mt-2">
+        <div className="relative inline-block">
           <p
             ref={dateFieldRef}
             className="text-gray-800 outline-none"
@@ -271,7 +291,7 @@ export default function GalleryPage() {
 
         {/* ✅ Passphrase */}
         <p
-          className="mt-2 text-gray-700 outline-none"
+          className="text-gray-700 outline-none"
           contentEditable
           suppressContentEditableWarning
           onFocus={(e) => (e.currentTarget.textContent = maskedPassphrase)}
@@ -297,6 +317,15 @@ export default function GalleryPage() {
           }
         >
           {maskedPassphrase || "Set a passphrase"}
+        </p>
+
+        <p
+          className="text-gray-800 outline-none"
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={(e) => setEditedStatus(e.currentTarget.textContent)}
+        >
+          {editedStatus || "DRAFT"}
         </p>
       </section>
 
