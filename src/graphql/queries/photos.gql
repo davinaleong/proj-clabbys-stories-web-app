@@ -1,14 +1,23 @@
 #import "../fragments/photoFields.gql"
 #import "../fragments/pageInfo.gql"
 
-query GetPhotos($galleryId: ID!) {
-  photos(galleryId: $galleryId) {
+# Fetch ALL photos (unassigned + assigned)
+query GetPhotos {
+  photos {
     ...PhotoFields
   }
 }
 
-query GetPhotosPaginated($galleryId: ID!, $after: String, $first: Int = 10) {
-  photosPaginated(galleryId: $galleryId, after: $after, first: $first) {
+# Fetch only photos assigned to a gallery
+query GetGalleryPhotos($galleryId: ID!) {
+  galleryPhotos(galleryId: $galleryId) {
+    ...PhotoFields
+  }
+}
+
+# Paginated ALL photos
+query GetPhotosPaginated($after: String, $first: Int = 10) {
+  photosPaginated(after: $after, first: $first) {
     edges {
       cursor
       node {

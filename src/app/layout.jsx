@@ -1,5 +1,7 @@
+import { ApolloProvider } from "@apollo/client"
 import { Montserrat, Playfair } from "next/font/google"
 import { env } from "./lib/env"
+import { client } from "./lib/apollo-client"
 import "./globals.css"
 
 const montserrat = Montserrat({
@@ -23,7 +25,8 @@ export default function RootLayout({ children }) {
       <body
         className={`${montserrat.variable} ${playfair.variable} antialiased`}
       >
-        {children}
+        {/* ✅ ApolloProvider wraps the whole app */}
+        <ApolloProvider client={client}>{children}</ApolloProvider>
       </body>
     </html>
   )

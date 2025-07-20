@@ -1,24 +1,26 @@
 #import "../fragments/galleryFields.gql"
 #import "../fragments/pageInfo.gql"
 
-query GetGalleries($userId: ID) {
-  galleries(userId: $userId) {
+# Fetch all galleries (no user filtering)
+query GetGalleries {
+  galleries {
     ...GalleryFields
   }
 }
 
+# Fetch a single gallery by ID, with its photos
 query GetGallery($id: ID!) {
   gallery(id: $id) {
     ...GalleryFields
     photos {
-      id
-      imageUrl
+      ...PhotoFields
     }
   }
 }
 
-query GetGalleriesPaginated($userId: ID, $after: String, $first: Int = 10) {
-  galleriesPaginated(userId: $userId, after: $after, first: $first) {
+# Paginated Galleries
+query GetGalleriesPaginated($after: String, $first: Int = 10) {
+  galleriesPaginated(after: $after, first: $first) {
     edges {
       cursor
       node {

@@ -1,21 +1,32 @@
 #import "../fragments/galleryFields.gql"
 
+# Create a new gallery (with title, date, description, optional passphrase)
 mutation CreateGallery($data: CreateGalleryInput!) {
   createGallery(data: $data) {
     ...GalleryFields
   }
 }
 
+# Update an existing gallery (edit title, date, description, passphrase)
+mutation UpdateGallery($id: ID!, $data: UpdateGalleryInput!) {
+  updateGallery(id: $id, data: $data) {
+    ...GalleryFields
+  }
+}
+
+# Publish a gallery
 mutation PublishGallery($id: ID!) {
   publishGallery(id: $id) {
     ...GalleryFields
   }
 }
 
+# Set gallery passphrase
 mutation SetGalleryPassphrase($id: ID!, $passphrase: String!) {
   setGalleryPassphrase(id: $id, passphrase: $passphrase)
 }
 
+# Login to a gallery with passphrase
 mutation LoginGallery($id: ID!, $passphrase: String!) {
   loginGallery(id: $id, passphrase: $passphrase) {
     token
