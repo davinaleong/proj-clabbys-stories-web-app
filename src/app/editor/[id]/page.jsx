@@ -1,25 +1,12 @@
 "use client"
 import { useParams } from "next/navigation"
 import { gql, useQuery } from "@apollo/client"
-import { useState, useEffect } from "react"
 import Image from "next/image"
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core"
-import {
-  SortableContext,
-  rectSortingStrategy,
-  arrayMove,
-} from "@dnd-kit/sortable"
-
-import SortablePhoto from "../../components/SortablePhoto"
+import { useState, useEffect } from "react"
+import { formatDate } from "../../../utils/format-date"
 import placeholderImage from "./../../assets/images/placeholder-cbs.png"
 import checkIcon from "./../../assets/icons/check.svg"
-import { formatDate } from "../../../utils/format-date"
+import Toast from "../../components/Toast" // ✅ import the new Toast component
 
 // ✅ GraphQL query for single gallery
 const GET_GALLERY = gql`
@@ -48,37 +35,31 @@ export default function GalleryPage() {
     variables: { id: galleryId },
   })
 
-  // ✅ Always call hooks in the same order
-  const [photos, setPhotos] = useState([])
+  // ✅ Local editable states
+  const [editedTitle, setEditedTitle] = useState("")
+  const [editedDescription, setEditedDescription] = useState("")
+  const [editedDate, setEditedDate] = useState("")
+  const [actualPassphrase, setActualPassphrase] = useState("")
+  const maskedPassphrase = actualPassphrase.replace(/./g, "*")
 
-  // ✅ Extract gallery safely
-  const gallery = data?.gallery || null
+  // ✅ Validation + toast states
+  const [validationError, setValidationError] = useState("")
+  const [toastMessage, setToastMessage] = useState("")
+  const [toastType, setToastType] = useState("success") // success | error | warning
 
-  // ✅ When data changes, update photos
   useEffect(() => {
-    if (gallery?.photos?.length) {
-      setPhotos(gallery.photos)
-    } else {
-      setPhotos(
-        Array(8).fill({ id: crypto.randomUUID(), imageUrl: placeholderImage })
+    if (data?.gallery) {
+      const g = data.gallery
+      setEditedTitle(g.title || "Untitled Gallery")
+      setEditedDescription(g.description || "No description provided.")
+      setEditedDate(
+        g.date
+          ? formatDate(g.date, "EEEE_DD_MMM_YYYY")
+          : formatDate(g.createdAt, "EEEE_DD_MMM_YYYY")
       )
+      setActualPassphrase("")
     }
-  }, [gallery])
-
-  // ✅ Sensors for drag & drop (safe to define here)
-  const sensors = useSensors(useSensor(PointerSensor))
-
-  // ✅ Handle drag reorder
-  const handleDragEnd = (event) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    setPhotos((prevPhotos) => {
-      const oldIndex = prevPhotos.findIndex((p) => p.id === active.id)
-      const newIndex = prevPhotos.findIndex((p) => p.id === over.id)
-      return arrayMove(prevPhotos, oldIndex, newIndex)
-    })
-  }
+  }, [data])
 
   if (loading) {
     return (
@@ -96,38 +77,152 @@ export default function GalleryPage() {
     )
   }
 
-  const galleryDate = gallery
-    ? formatDate(gallery.date || gallery.createdAt, "EEEE_DD_MMM_YYYY")
-    : ""
+  const gallery = data?.gallery || { photos: [] }
+  const photos = gallery.photos?.length
+    ? gallery.photos
+    : Array(8).fill({ id: "placeholder", imageUrl: placeholderImage })
+
+  const validateForm = () => {
+    if (!editedTitle.trim()) {
+      return "Title cannot be empty."
+    }
+    if (editedDate.trim()) {
+      const testDate = Date.parse(editedDate.trim())
+      if (isNaN(testDate)) {
+        return "Please enter a valid date format."
+      }
+    }
+    if (actualPassphrase && actualPassphrase.length < 4) {
+      return "Passphrase must be at least 4 characters."
+    }
+    return ""
+  }
+
+  const handleSave = () => {
+    const errorMsg = validateForm()
+    if (errorMsg) {
+      setToastType("error")
+      setToastMessage(errorMsg)
+      return
+    }
+
+    // ✅ Simulate success
+    console.log("Saving edits:", {
+      title: editedTitle,
+      description: editedDescription,
+      date: editedDate,
+      passphrase: actualPassphrase,
+    })
+
+    // ✅ Show success toast
+    setToastType("success")
+    setToastMessage("✅ Gallery saved!")
+  }
 
   return (
-    <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{gallery?.title || "Untitled"}</h1>
+    <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 flow">
+      {/* ✅ Toast Notification */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastMessage("")}
+      />
+
+      {/* ✅ Title + Save Button */}
+      <header className="flex justify-between items-center">
+        <h1
+          className="font-serif text-3xl font-bold text-carbon-blue-700 outline-none"
+          contentEditable="true"
+          suppressContentEditableWarning={true}
+          onBlur={(e) => setEditedTitle(e.currentTarget.textContent)}
+        >
+          {editedTitle}
+        </h1>
+
+        <button
+          type="button"
+          className="flex gap-2 cursor-pointer items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md hover:bg-carbon-blue-500"
+          onClick={handleSave}
+        >
+          <Image src={checkIcon} alt="Check Icon" width={16} height={16} /> Save
+        </button>
       </header>
 
-      <p className="mb-2 text-gray-700">
-        {gallery?.description || "No description"}
-      </p>
-      <p className="text-sm text-gray-500 mb-4">{galleryDate}</p>
-
-      {/* ✅ Drag & Drop Photo Grid */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={photos.map((p) => p.id)}
-          strategy={rectSortingStrategy}
+      {/* ✅ Gallery Info Section */}
+      <section className="mb-6 space-y-2">
+        {/* Editable Description */}
+        <p
+          className="text-gray-800 outline-none"
+          contentEditable="true"
+          suppressContentEditableWarning={true}
+          onBlur={(e) => setEditedDescription(e.currentTarget.textContent)}
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {photos.map((photo) => (
-              <SortablePhoto key={photo.id} photo={photo} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          {editedDescription}
+        </p>
+
+        {/* Editable Date */}
+        <p
+          className="text-gray-700 outline-none"
+          contentEditable="true"
+          suppressContentEditableWarning={true}
+          onBlur={(e) => setEditedDate(e.currentTarget.textContent)}
+        >
+          {editedDate}
+        </p>
+
+        {/* Editable Passphrase */}
+        <p
+          className="text-gray-700 outline-none"
+          contentEditable="true"
+          suppressContentEditableWarning={true}
+          onFocus={(e) => {
+            e.currentTarget.textContent = maskedPassphrase
+          }}
+          onInput={(e) => {
+            const text = e.currentTarget.textContent || ""
+            if (text.length > maskedPassphrase.length) {
+              const newChar = text.slice(-1)
+              setActualPassphrase((prev) => prev + newChar)
+            } else if (text.length < maskedPassphrase.length) {
+              setActualPassphrase((prev) => prev.slice(0, -1))
+            }
+            e.currentTarget.textContent = actualPassphrase.replace(/./g, "*")
+            const range = document.createRange()
+            const sel = window.getSelection()
+            range.selectNodeContents(e.currentTarget)
+            range.collapse(false)
+            sel.removeAllRanges()
+            sel.addRange(range)
+          }}
+          onBlur={(e) => {
+            e.currentTarget.textContent = maskedPassphrase || "Enter passphrase"
+          }}
+        >
+          {maskedPassphrase || "Enter passphrase"}
+        </p>
+      </section>
+
+      {/* ✅ Photos Section */}
+      <section>
+        <h2 className="text-lg font-semibold text-carbon-blue-700 mb-4 sr-only">
+          Photos
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {photos.map((photo, i) => (
+            <div
+              key={photo.id || i}
+              className="relative aspect-[3/4] bg-gray-100 rounded overflow-hidden"
+            >
+              <Image
+                src={photo.imageUrl || placeholderImage}
+                alt={photo.caption || `Photo ${i + 1}`}
+                fill
+                className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   )
 }

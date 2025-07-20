@@ -3,13 +3,16 @@ import { gql, useQuery } from "@apollo/client"
 import Image from "next/image"
 import Link from "next/link"
 
+// ✅ Utilities
+import { formatDate } from "../../utils/format-date"
+
 // ✅ GalleryCard
 import GalleryCard from "./../components/GalleryCard"
 
 // ✅ Icons
 import plusIcon from "./../assets/icons/plus.svg"
 
-// ✅ Fetch ALL galleries with photos
+// ✅ Fetch ALL galleries with photos + status
 const GET_ALL_GALLERIES = gql`
   query GetGalleries {
     galleries {
@@ -17,7 +20,9 @@ const GET_ALL_GALLERIES = gql`
       id
       title
       description
+      date
       createdAt
+      status
       photos {
         __typename
         id
@@ -70,12 +75,20 @@ export default function EditorPage() {
         {galleries.map((gallery) => {
           const previewImages =
             gallery.photos?.slice(0, 4).map((p) => p.imageUrl) || []
+
+          // ✅ Prefer gallery.date, fallback to createdAt
+          const rawDate = gallery.date || gallery.createdAt
+          const formattedDate = rawDate
+            ? formatDate(rawDate, "EEE_DD_MMM_YYYY")
+            : "No date set"
+
           return (
             <GalleryCard
               key={gallery.id}
               images={previewImages}
               title={gallery.title}
-              date={gallery.date ? gallery.date : gallery.createdAt}
+              status={gallery.status}
+              date={formattedDate}
               description={gallery.description || "No description provided."}
               href={`/editor/${gallery.id}`}
             />

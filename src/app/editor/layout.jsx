@@ -33,7 +33,10 @@ export default function EditorLayout({ children }) {
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex gap-6">
-            <Link href="#" className="flex gap-2 items-center hover:underline">
+            <Link
+              href="/editor"
+              className="flex gap-2 items-center hover:underline"
+            >
               <Image src={grid2x2Icon} alt="Grid Icon" width={16} height={16} />{" "}
               Galleries
             </Link>
@@ -79,7 +82,7 @@ export default function EditorLayout({ children }) {
         {menuOpen && (
           <div className="bg-carbon-blue-500 text-white flex flex-col md:hidden">
             <Link
-              href="#"
+              href="/editor"
               className="flex gap-2 items-center py-2 px-6 hover:bg-carbon-blue-700"
             >
               <Image src={grid2x2Icon} alt="Grid Icon" width={16} height={16} />{" "}

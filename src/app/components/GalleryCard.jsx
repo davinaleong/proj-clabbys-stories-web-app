@@ -9,6 +9,7 @@ export default function GalleryCard({
   title,
   date,
   description,
+  status,
   images = [],
   href = "#",
 }) {
@@ -48,7 +49,8 @@ export default function GalleryCard({
       {/* White translucent overlay for title/description */}
       <div className="absolute inset-0 bg-white/70 flex flex-col justify-center items-center text-center p-4">
         <h2 className="text-2xl font-serif font-bold text-carbon-blue-700">
-          {title}
+          {title}{" "}
+          <small className="text-sm font-normal font-sans">({status})</small>
         </h2>
         <p className="text-sm italic text-gray-700">{formattedDate}</p>
         <p className="text-sm text-gray-700 mt-1 line-clamp-2">{description}</p>
