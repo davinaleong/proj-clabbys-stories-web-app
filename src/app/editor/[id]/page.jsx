@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { formatDate } from "../../../utils/format-date"
 import placeholderImage from "./../../assets/images/placeholder-cbs.png"
 import checkIcon from "./../../assets/icons/check.svg"
+import Toast from "../../components/Toast" // ✅ import the new Toast component
 
 // ✅ GraphQL query for single gallery
 const GET_GALLERY = gql`
@@ -43,9 +44,9 @@ export default function GalleryPage() {
 
   // ✅ Validation + toast states
   const [validationError, setValidationError] = useState("")
-  const [toastMessage, setToastMessage] = useState("") // for success toast
+  const [toastMessage, setToastMessage] = useState("")
+  const [toastType, setToastType] = useState("success") // success | error | warning
 
-  // ✅ Pre-fill after loading data
   useEffect(() => {
     if (data?.gallery) {
       const g = data.gallery
@@ -81,58 +82,51 @@ export default function GalleryPage() {
     ? gallery.photos
     : Array(8).fill({ id: "placeholder", imageUrl: placeholderImage })
 
-  // ✅ Validation logic
   const validateForm = () => {
     if (!editedTitle.trim()) {
       return "Title cannot be empty."
     }
-
     if (editedDate.trim()) {
       const testDate = Date.parse(editedDate.trim())
       if (isNaN(testDate)) {
         return "Please enter a valid date format."
       }
     }
-
     if (actualPassphrase && actualPassphrase.length < 4) {
       return "Passphrase must be at least 4 characters."
     }
-
     return ""
   }
 
   const handleSave = () => {
     const errorMsg = validateForm()
     if (errorMsg) {
-      setValidationError(errorMsg)
+      setToastType("error")
+      setToastMessage(errorMsg)
       return
     }
 
-    setValidationError("")
-    console.log("✅ Saving edits:", {
+    // ✅ Simulate success
+    console.log("Saving edits:", {
       title: editedTitle,
       description: editedDescription,
       date: editedDate,
       passphrase: actualPassphrase,
     })
 
-    // ✅ Show toast after successful save
-    setToastMessage("Gallery saved!")
-
-    // Auto-hide toast after 3 seconds
-    setTimeout(() => setToastMessage(""), 3000)
-
-    // TODO: call `updateGallery` mutation here
+    // ✅ Show success toast
+    setToastType("success")
+    setToastMessage("✅ Gallery saved!")
   }
 
   return (
     <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 flow">
       {/* ✅ Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg animate-fade-in-out">
-          {toastMessage}
-        </div>
-      )}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastMessage("")}
+      />
 
       {/* ✅ Title + Save Button */}
       <header className="flex justify-between items-center">
@@ -153,11 +147,6 @@ export default function GalleryPage() {
           <Image src={checkIcon} alt="Check Icon" width={16} height={16} /> Save
         </button>
       </header>
-
-      {/* ✅ Validation Errors */}
-      {validationError && (
-        <p className="mt-2 text-red-500 text-sm">{validationError}</p>
-      )}
 
       {/* ✅ Gallery Info Section */}
       <section className="mb-6 space-y-2">
@@ -181,7 +170,7 @@ export default function GalleryPage() {
           {editedDate}
         </p>
 
-        {/* Editable Passphrase (masked while typing) */}
+        {/* Editable Passphrase */}
         <p
           className="text-gray-700 outline-none"
           contentEditable="true"
@@ -234,31 +223,6 @@ export default function GalleryPage() {
           ))}
         </div>
       </section>
-
-      {/* ✅ Simple fade animation for toast */}
-      <style jsx>{`
-        @keyframes fadeInOut {
-          0% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          10% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          90% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-        }
-        .animate-fade-in-out {
-          animation: fadeInOut 3s ease-in-out forwards;
-        }
-      `}</style>
     </main>
   )
 }
