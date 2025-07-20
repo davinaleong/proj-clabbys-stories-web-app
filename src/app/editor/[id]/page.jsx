@@ -1,6 +1,6 @@
 "use client"
 import { useParams } from "next/navigation"
-import { gql, useQuery } from "@apollo/client"
+import { gql, useQuery, useMutation } from "@apollo/client"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import {
@@ -17,12 +17,11 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { formatDate } from "./../../../utils/format-date"
+import { formatDate } from "../../../utils/format-date"
 import checkIcon from "./../../assets/icons/check.svg"
-import Toast from "./../../components/Toast"
-import SortablePhoto from "./../../components/SortablePhoto"
+import Toast from "../../components/Toast"
 
-// ✅ GraphQL query for single gallery
+// ✅ Queries
 const GET_GALLERY = gql`
   query GetGallery($id: ID!) {
     gallery(id: $id) {
@@ -30,13 +29,36 @@ const GET_GALLERY = gql`
       title
       description
       date
+      passphraseHash
       createdAt
       photos {
         id
         imageUrl
         caption
         takenAt
+        position
       }
+    }
+  }
+`
+
+// ✅ Mutations
+const UPDATE_GALLERY = gql`
+  mutation UpdateGallery($id: ID!, $data: UpdateGalleryInput!) {
+    updateGallery(id: $id, data: $data) {
+      id
+      title
+      description
+      date
+    }
+  }
+`
+
+const UPDATE_PHOTO_ORDER = gql`
+  mutation UpdatePhotoOrder($updates: [PhotoOrderUpdateInput!]!) {
+    updatePhotoOrder(updates: $updates) {
+      id
+      position
     }
   }
 `
@@ -50,35 +72,43 @@ export default function GalleryPage() {
     fetchPolicy: "no-cache",
   })
 
+  const [updateGalleryMutation] = useMutation(UPDATE_GALLERY)
+  const [updatePhotoOrderMutation] = useMutation(UPDATE_PHOTO_ORDER)
+
   // ✅ Editable states
-  const [editedTitle, setEditedTitle] = useState("")
-  const [editedDescription, setEditedDescription] = useState("")
-  const [editedDate, setEditedDate] = useState("")
-  const [actualPassphrase, setActualPassphrase] = useState("")
+  const [editedTitle, setEditedTitle] = useState("Untitled Gallery")
+  const [editedDescription, setEditedDescription] = useState(
+    "No description provided."
+  )
+  const [editedDate, setEditedDate] = useState("No date is set")
+  const [actualPassphrase, setActualPassphrase] = useState("Set a passphrase")
   const maskedPassphrase = actualPassphrase.replace(/./g, "*")
   const [photos, setPhotos] = useState([])
 
-  // ✅ Toast + validation states
+  // ✅ Toast state
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState("success")
 
-  // ✅ Load gallery data into state
   useEffect(() => {
     if (data?.gallery) {
       const g = data.gallery
+
       setEditedTitle(g.title || "Untitled Gallery")
       setEditedDescription(g.description || "No description provided.")
-      setEditedDate(
-        g.date
-          ? formatDate(g.date, "EEEE_DD_MMM_YYYY")
-          : formatDate(g.createdAt, "EEEE_DD_MMM_YYYY")
-      )
+
+      if (!g.date || Number(g.date) < 0) {
+        setEditedDate("No date is set")
+      } else {
+        const parsedDate = new Date(Number(g.date))
+        setEditedDate(formatDate(parsedDate.toISOString(), "EEEE_DD_MMM_YYYY"))
+      }
+
       setActualPassphrase("")
       setPhotos(g.photos || [])
     }
   }, [data])
 
-  // ✅ DnD sensors
+  // ✅ Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -103,10 +133,14 @@ export default function GalleryPage() {
 
     const oldIndex = photos.findIndex((p) => p.id === active.id)
     const newIndex = photos.findIndex((p) => p.id === over.id)
-    setPhotos((items) => arrayMove(items, oldIndex, newIndex))
+
+    const newOrder = arrayMove(photos, oldIndex, newIndex).map(
+      (p, idx) => ({ ...p, position: idx }) // ✅ assign new positions
+    )
+    setPhotos(newOrder)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const errorMsg = validateForm()
     if (errorMsg) {
       setToastType("error")
@@ -114,16 +148,40 @@ export default function GalleryPage() {
       return
     }
 
-    console.log("Saving edits:", {
-      title: editedTitle,
-      description: editedDescription,
-      date: editedDate,
-      passphrase: actualPassphrase,
-      reorderedPhotos: photos.map((p) => p.id),
-    })
+    try {
+      // ✅ Convert human-readable date back to ISO
+      const parsedDate = editedDate.trim() ? new Date(editedDate) : null
+      const isoDate =
+        parsedDate && !isNaN(parsedDate) ? parsedDate.toISOString() : null
 
-    setToastType("success")
-    setToastMessage("✅ Gallery saved!")
+      // ✅ 1. Save gallery details
+      await updateGalleryMutation({
+        variables: {
+          id: galleryId,
+          data: {
+            title: editedTitle,
+            description: editedDescription,
+            date: isoDate, // <-- ISO format
+            passphrase: actualPassphrase || undefined,
+          },
+        },
+      })
+
+      // ✅ 2. Save photo order
+      const updates = photos.map((p, index) => ({
+        photoId: p.id,
+        position: index,
+      }))
+
+      await updatePhotoOrderMutation({ variables: { updates } })
+
+      setToastType("success")
+      setToastMessage("✅ Gallery details & photo order saved!")
+    } catch (err) {
+      console.error("Save failed:", err)
+      setToastType("error")
+      setToastMessage("❌ Failed to save gallery. Try again.")
+    }
   }
 
   if (loading) {
@@ -142,30 +200,28 @@ export default function GalleryPage() {
     )
   }
 
-  const gallery = data?.gallery || { photos: [] }
-
   return (
-    <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
-      {/* ✅ Toast Notification */}
+    <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 flow sm:px-6 py-8">
+      {/* ✅ Toast */}
       <Toast
+        className="mt-0"
         message={toastMessage}
         type={toastType}
         onClose={() => setToastMessage("")}
       />
 
-      {/* ✅ Title + Save Button */}
+      {/* ✅ Title + Save */}
       <header className="flex justify-between items-center">
         <h1
           className="font-serif text-3xl font-bold text-carbon-blue-700 outline-none"
-          contentEditable="true"
-          suppressContentEditableWarning={true}
+          contentEditable
+          suppressContentEditableWarning
           onBlur={(e) => setEditedTitle(e.currentTarget.textContent)}
         >
           {editedTitle}
         </h1>
 
         <button
-          type="button"
           className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md hover:bg-carbon-blue-500"
           onClick={handleSave}
         >
@@ -173,33 +229,30 @@ export default function GalleryPage() {
         </button>
       </header>
 
-      {/* ✅ Gallery Info Section */}
-      <section className="mb-6 space-y-2">
-        {/* Editable Description */}
+      {/* ✅ Editable Fields */}
+      <section>
         <p
           className="text-gray-800 outline-none"
-          contentEditable="true"
-          suppressContentEditableWarning={true}
+          contentEditable
+          suppressContentEditableWarning
           onBlur={(e) => setEditedDescription(e.currentTarget.textContent)}
         >
           {editedDescription}
         </p>
 
-        {/* Editable Date */}
         <p
           className="text-gray-700 outline-none"
-          contentEditable="true"
-          suppressContentEditableWarning={true}
+          contentEditable
+          suppressContentEditableWarning
           onBlur={(e) => setEditedDate(e.currentTarget.textContent)}
         >
           {editedDate}
         </p>
 
-        {/* Editable Passphrase */}
         <p
           className="text-gray-700 outline-none"
-          contentEditable="true"
-          suppressContentEditableWarning={true}
+          contentEditable
+          suppressContentEditableWarning
           onFocus={(e) => (e.currentTarget.textContent = maskedPassphrase)}
           onInput={(e) => {
             const text = e.currentTarget.textContent || ""
@@ -219,16 +272,16 @@ export default function GalleryPage() {
           }}
           onBlur={(e) =>
             (e.currentTarget.textContent =
-              maskedPassphrase || "Enter passphrase")
+              maskedPassphrase || "Set a passphrase")
           }
         >
-          {maskedPassphrase || "Enter passphrase"}
+          {maskedPassphrase || "Set a passphrase"}
         </p>
       </section>
 
-      {/* ✅ Photos Section with Drag-and-Drop */}
+      {/* ✅ Photos with drag-and-drop */}
       <section>
-        <h2 className="text-lg font-semibold text-carbon-blue-700 mb-4">
+        <h2 className="text-lg font-semibold text-carbon-blue-700 mb-4 sr-only">
           Photos
         </h2>
 
@@ -254,5 +307,34 @@ export default function GalleryPage() {
         )}
       </section>
     </main>
+  )
+}
+
+/** ✅ SortablePhoto Component */
+function SortablePhoto({ photo }) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: photo.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    cursor: "grab",
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}
+      className="relative aspect-[3/4] bg-gray-100 rounded overflow-hidden shadow hover:shadow-lg transition-all"
+    >
+      <Image
+        src={photo.imageUrl}
+        alt={photo.caption || "Photo"}
+        fill
+        className="object-cover"
+      />
+    </div>
   )
 }
