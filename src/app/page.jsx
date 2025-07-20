@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState } from "react"
 import { validatePassword } from "./lib/password-check"
+import { env } from "./lib/env"
 import logo from "./assets/logos/logo-midnight.png"
 
 export default function LoginPage() {
@@ -18,7 +19,7 @@ export default function LoginPage() {
     // Optional: validate PIN against env hash
     const isValid = await validatePassword(pin)
     if (isValid) {
-      setStatus("✅ Access Granted")
+      setStatus("Access Granted")
       // redirect or load the protected page
       router.push("/editor")
     } else {
@@ -36,8 +37,8 @@ export default function LoginPage() {
         </div>
 
         {/* App Name */}
-        <h1 className="text-xl font-serif font-semibold text-carbon-blue-500 mb-6">
-          App Name
+        <h1 className="text-2xl font-serif font-semibold text-carbon-blue-500 mb-6">
+          {env.APP_NAME}
         </h1>
 
         {/* PIN Form */}
@@ -63,7 +64,9 @@ export default function LoginPage() {
 
         {/* Status Message */}
         {status && (
-          <p className="mt-3 text-sm text-red-500 text-center">{status}</p>
+          <p className="mt-3 text-sm text-carbon-blue-500 text-center">
+            {status}
+          </p>
         )}
       </div>
     </main>
