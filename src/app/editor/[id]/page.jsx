@@ -17,10 +17,12 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
 import checkIcon from "./../../assets/icons/check.svg"
 import Toast from "./../../components/Toast"
 import DatePicker from "./../../components/DatePicker"
+import StatusPicker from "./../../components/StatusPicker"
 
 // ✅ Queries
 const GET_GALLERY = gql`
@@ -38,6 +40,16 @@ const GET_GALLERY = gql`
         caption
         takenAt
         position
+      }
+    }
+  }
+`
+
+const GET_GALLERY_STATUS_ENUM = gql`
+  query GetGalleryStatusEnum {
+    __type(name: "GalleryStatus") {
+      enumValues {
+        name
       }
     }
   }
@@ -74,6 +86,9 @@ export default function GalleryPage() {
     fetchPolicy: "no-cache",
   })
 
+  const { data: enumData } = useQuery(GET_GALLERY_STATUS_ENUM)
+  const statusOptions = enumData?.__type?.enumValues || []
+
   const [updateGalleryMutation] = useMutation(UPDATE_GALLERY)
   const [updatePhotoOrderMutation] = useMutation(UPDATE_PHOTO_ORDER)
 
@@ -89,6 +104,8 @@ export default function GalleryPage() {
   const maskedPassphrase = actualPassphrase.replace(/./g, "*")
 
   const [editedStatus, setEditedStatus] = useState("DRAFT")
+  const [isStatusOpen, setStatusOpen] = useState(false)
+  const statusFieldRef = useRef(null)
 
   const [photos, setPhotos] = useState([])
 
@@ -116,7 +133,7 @@ export default function GalleryPage() {
         setEditedDate(formatDate(parsedDate.toISOString(), "EEEE_D_MMM_YYYY"))
       }
 
-      console.log("Date", editedDate)
+      setEditedStatus(g.status || "DRAFT")
 
       setActualPassphrase("")
       setPhotos(g.photos || [])
@@ -182,6 +199,7 @@ export default function GalleryPage() {
         title: editedTitle,
         description: editedDescription,
         date: isoDate, // backend expects ISO
+        status: editedStatus,
       }
 
       // ✅ Only include passphrase if user actually edited it
@@ -276,7 +294,7 @@ export default function GalleryPage() {
             {editedDate || "No date is set"}
           </p>
 
-          {/* ✅ Floating Date Picker Menu */}
+          {/* ✅ Date Picker */}
           <DatePicker
             anchorRef={dateFieldRef}
             isOpen={isPickerOpen}
@@ -319,14 +337,25 @@ export default function GalleryPage() {
           {maskedPassphrase || "Set a passphrase"}
         </p>
 
-        <p
-          className="text-gray-800 outline-none"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => setEditedStatus(e.currentTarget.textContent)}
-        >
-          {editedStatus || "DRAFT"}
-        </p>
+        {/* ✅ Status Field */}
+        <div className="relative inline-block">
+          <p
+            ref={statusFieldRef}
+            className="text-gray-800 outline-none"
+            onClick={() => setStatusOpen((prev) => !prev)}
+          >
+            {editedStatus === "DRAFT" ? "Draft" : "Published"}
+          </p>
+
+          <StatusPicker
+            anchorRef={statusFieldRef}
+            isOpen={isStatusOpen}
+            options={statusOptions}
+            currentStatus={editedStatus}
+            onClose={() => setStatusOpen(false)}
+            onSelect={(val) => setEditedStatus(val)}
+          />
+        </div>
       </section>
 
       {/* ✅ Photos with drag-and-drop */}
