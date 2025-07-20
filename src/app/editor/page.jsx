@@ -53,7 +53,7 @@ export default function EditorPage() {
   return (
     <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-8">
       {/* ✅ Title + Add Button */}
-      <div className="flex justify-between items-center mb-6">
+      <header className="flex justify-between items-center mb-6">
         <h1 className="font-serif text-3xl font-bold text-carbon-blue-700">
           Galleries
         </h1>
@@ -61,12 +61,12 @@ export default function EditorPage() {
           href="#"
           className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md hover:bg-carbon-blue-800"
         >
-          <Image src={plusIcon} alt="Add Gallery" width={16} height={16} /> Add
+          <Image src={plusIcon} alt="Plus Icon" width={16} height={16} /> Add
         </Link>
-      </div>
+      </header>
 
       {/* ✅ Galleries Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {galleries.map((gallery) => {
           const previewImages =
             gallery.photos?.slice(0, 4).map((p) => p.imageUrl) || []
@@ -77,10 +77,11 @@ export default function EditorPage() {
               title={gallery.title}
               date={gallery.date ? gallery.date : gallery.createdAt}
               description={gallery.description || "No description provided."}
+              href={`/editor/${gallery.id}`}
             />
           )
         })}
-      </div>
+      </section>
     </main>
   )
 }

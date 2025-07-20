@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image"
 import Link from "next/link"
-import { formatDate } from "./../lib/date-formatter"
+import { formatDate } from "../../utils/format-date"
 
 import imagePlaceholder from "./../assets/images/placeholder-cbs.png"
 
@@ -10,7 +10,7 @@ export default function GalleryCard({
   date,
   description,
   images = [],
-  url = "#",
+  href = "#",
 }) {
   const formattedDate = formatDate(date)
 
@@ -25,7 +25,7 @@ export default function GalleryCard({
 
   return (
     <Link
-      href={url}
+      href={href}
       className="relative w-full aspect-[4/3] border-4 border-white bg-white overflow-hidden"
     >
       {/* Grid of 4 images */}
