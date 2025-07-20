@@ -113,6 +113,8 @@ export default function GalleryPage() {
         setEditedDate(formatDate(parsedDate.toISOString(), "EEEE_D_MMM_YYYY"))
       }
 
+      console.log("Date", editedDate)
+
       setActualPassphrase("")
       setPhotos(g.photos || [])
     }
@@ -158,25 +160,27 @@ export default function GalleryPage() {
     }
 
     try {
+      // ✅ Save gallery
       await updateGalleryMutation({
         variables: {
           id: galleryId,
           data: {
             title: editedTitle,
             description: editedDescription,
-            date: isoDateValue || null, // ✅ already ISO from picker
+            date: isoDateValue,
             passphrase: actualPassphrase || undefined,
           },
         },
       })
 
-      // ✅ Save photo order...
+      // ✅ Save photo order
       const updates = photos.map((p, index) => ({
         photoId: p.id,
         position: index,
       }))
       await updatePhotoOrderMutation({ variables: { updates } })
 
+      // ✅ Trigger success toast
       setToastType("success")
       setToastMessage("✅ Gallery details & photo order saved!")
     } catch (err) {
@@ -257,10 +261,10 @@ export default function GalleryPage() {
             anchorRef={dateFieldRef}
             isOpen={isPickerOpen}
             onClose={() => setPickerOpen(false)}
-            outputFormat="EEEE_DD_MMM_YYYY"
-            onDateSelected={({ formatted, iso }) => {
-              setEditedDate(formatted) // ✅ show pretty date
-              setIsoDateValue(iso) // ✅ store ISO for saving
+            outputFormat="EEEE_D_MMM_YYYY"
+            onDateSelected={({ iso, formatted }) => {
+              setEditedDate(formatted) // show a pretty date
+              setIsoDateValue(iso) // store ISO for saving
             }}
           />
         </div>
