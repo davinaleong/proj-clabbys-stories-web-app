@@ -17,7 +17,6 @@ const GET_ALL_GALLERIES = gql`
       id
       title
       description
-      date
       createdAt
       photos {
         __typename
@@ -76,11 +75,7 @@ export default function EditorPage() {
               key={gallery.id}
               images={previewImages}
               title={gallery.title}
-              date={
-                gallery.date
-                  ? new Date(gallery.date).toLocaleDateString()
-                  : new Date(gallery.createdAt).toLocaleDateString()
-              }
+              date={gallery.date ? gallery.date : gallery.createdAt}
               description={gallery.description || "No description provided."}
             />
           )

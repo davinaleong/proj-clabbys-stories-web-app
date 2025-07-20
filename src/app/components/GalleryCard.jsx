@@ -1,11 +1,9 @@
 "use client"
 import Image from "next/image"
 import Link from "next/link"
+import { formatDate } from "./../lib/date-formatter"
 
-import image0001 from "./../assets/images/0001.jpg"
-import image0002 from "./../assets/images/0002.jpg"
-import image0003 from "./../assets/images/0003.jpg"
-import image0004 from "./../assets/images/0004.jpg"
+import imagePlaceholder from "./../assets/images/placeholder-cbs.png"
 
 export default function GalleryCard({
   title,
@@ -14,8 +12,15 @@ export default function GalleryCard({
   images = [],
   url = "#",
 }) {
+  const formattedDate = formatDate(date)
+
   // ✅ If no images provided, fallback to default placeholders
-  const fallbackImages = [image0001, image0002, image0003, image0004]
+  const fallbackImages = [
+    imagePlaceholder,
+    imagePlaceholder,
+    imagePlaceholder,
+    imagePlaceholder,
+  ]
   const displayImages = images && images.length > 0 ? images : fallbackImages
 
   return (
@@ -42,11 +47,11 @@ export default function GalleryCard({
 
       {/* White translucent overlay for title/description */}
       <div className="absolute inset-0 bg-white/70 flex flex-col justify-center items-center text-center p-4">
-        <h2 className="text-2xl font-serif font-semibold text-carbon-blue-700">
+        <h2 className="text-2xl font-serif font-bold text-carbon-blue-700">
           {title}
         </h2>
-        <p className="text-sm text-gray-700">{date}</p>
-        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
+        <p className="text-sm italic text-gray-700">{formattedDate}</p>
+        <p className="text-sm text-gray-700 mt-1 line-clamp-2">{description}</p>
       </div>
     </Link>
   )
