@@ -20,7 +20,7 @@ export default function SortablePhoto({ photo }) {
       style={style}
       {...attributes}
       {...listeners}
-      className="relative aspect-[3/4] bg-gray-100 rounded overflow-hidden shadow-sm"
+      className="relative aspect-[3/4] bg-gray-100 rounded overflow-hidden shadow-lg hover:shadow-xl transition-all"
     >
       <Image
         src={photo.imageUrl || placeholderImage}
