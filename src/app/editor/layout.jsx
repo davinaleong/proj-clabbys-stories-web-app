@@ -23,7 +23,9 @@ export default function EditorLayout({ children }) {
         {/* Logo + App Name */}
         <Link href="/editor" className="flex items-center gap-3">
           <Image src={whiteLogo} alt="Logo" width={40} height={40} />
-          <span className="font-semibold text-lg">{env.APP_NAME}</span>
+          <span className="font-serif font-semibold text-lg">
+            {env.APP_NAME}
+          </span>
         </Link>
 
         {/* Desktop Menu */}

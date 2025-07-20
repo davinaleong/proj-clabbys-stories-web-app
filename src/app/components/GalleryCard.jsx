@@ -31,8 +31,8 @@ export default function GalleryCard({ images = [], title, date, description }) {
       </div>
 
       {/* White translucent overlay for title/description */}
-      <div className="absolute inset-0 bg-white/60 flex flex-col justify-center items-center text-center p-4">
-        <h2 className="text-xl font-serif font-semibold text-carbon-blue-700">
+      <div className="absolute inset-0 bg-white/70 flex flex-col justify-center items-center text-center p-4">
+        <h2 className="text-2xl font-serif font-semibold text-carbon-blue-700">
           {title}
         </h2>
         <p className="text-sm text-gray-700">{date}</p>

@@ -22,7 +22,7 @@ export default function LoginPage() {
       // redirect or load the protected page
       router.push("/editor")
     } else {
-      setStatus("❌ Invalid PIN")
+      setStatus("Invalid PIN")
     }
   }
 
@@ -36,7 +36,9 @@ export default function LoginPage() {
         </div>
 
         {/* App Name */}
-        <h1 className="text-xl font-semibold text-[#1c1c4a] mb-6">App Name</h1>
+        <h1 className="text-xl font-serif font-semibold text-carbon-blue-500 mb-6">
+          App Name
+        </h1>
 
         {/* PIN Form */}
         <form
@@ -61,7 +63,7 @@ export default function LoginPage() {
 
         {/* Status Message */}
         {status && (
-          <p className="mt-3 text-sm text-[#1c1c4a] text-center">{status}</p>
+          <p className="mt-3 text-sm text-red-500 text-center">{status}</p>
         )}
       </div>
     </main>

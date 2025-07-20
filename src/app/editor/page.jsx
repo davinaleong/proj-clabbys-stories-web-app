@@ -21,7 +21,7 @@ export default function EditorPage() {
     <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-8">
       {/* Title + Add Button */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="font-serif text-2xl font-bold text-carbon-blue-700">
+        <h1 className="font-serif text-3xl font-bold text-carbon-blue-700">
           Galleries
         </h1>
         <Link
