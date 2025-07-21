@@ -2,28 +2,55 @@
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState } from "react"
-import { validatePassword } from "./lib/password-check"
+import { gql, useMutation } from "@apollo/client"
 import { env } from "./lib/env"
 import logo from "./assets/logos/logo-midnight.png"
 
+// ✅ Inline GraphQL mutation for login
+const LOGIN_USER = gql`
+  mutation LoginUser($email: String!, $password: String!) {
+    loginUser(email: $email, password: $password) {
+      token
+      user {
+        id
+        name
+        email
+      }
+    }
+  }
+`
+
 export default function LoginPage() {
-  const [pin, setPin] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [status, setStatus] = useState("")
 
   const router = useRouter()
 
+  // ✅ Apollo mutation hook
+  const [loginUser, { loading }] = useMutation(LOGIN_USER)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setStatus("Checking PIN...")
+    setStatus("Logging in...")
 
-    // Optional: validate PIN against env hash
-    const isValid = await validatePassword(pin)
-    if (isValid) {
-      setStatus("Access Granted")
-      // redirect or load the protected page
-      router.push("/editor")
-    } else {
-      setStatus("Invalid PIN")
+    try {
+      const { data } = await loginUser({
+        variables: { email, password },
+      })
+
+      if (data?.loginUser?.token) {
+        // ✅ Store token in localStorage (can switch to cookies later)
+        localStorage.setItem("auth_token", data.loginUser.token)
+
+        setStatus(`Welcome, ${data.loginUser.user.name}!`)
+        router.push("/editor") // ✅ Redirect to protected page
+      } else {
+        setStatus("Invalid credentials")
+      }
+    } catch (err: any) {
+      console.error(err)
+      setStatus("Login failed. Check email & password.")
     }
   }
 
@@ -32,7 +59,6 @@ export default function LoginPage() {
       <div className="flex flex-col items-center w-full max-w-xs px-4">
         {/* Logo */}
         <div className="mb-4">
-          {/* Replace with your SVG or <Image /> */}
           <Image src={logo} alt="Logo" width={100} height={100} />
         </div>
 
@@ -41,24 +67,35 @@ export default function LoginPage() {
           {env.APP_NAME}
         </h1>
 
-        {/* PIN Form */}
+        {/* Login Form */}
         <form
           onSubmit={handleSubmit}
           className="w-full flex flex-col space-y-3"
         >
           <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-md px-4 py-2 bg-neutral-100 text-gray-800 text-center outline-none focus:ring-2 focus:ring-carbon-blue-500"
+            required
+          />
+
+          <input
             type="password"
             placeholder="Password"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            className="w-full rounded-md px-4 py-2 cursor-pointer bg-neutral-100 text-gray-800 text-center outline-none focus:ring-2 focus:ring-carbon-blue-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-md px-4 py-2 bg-neutral-100 text-gray-800 text-center outline-none focus:ring-2 focus:ring-carbon-blue-500"
+            required
           />
 
           <button
             type="submit"
-            className="w-full rounded-md bg-carbon-blue-500 text-white py-2 font-medium hover:bg-carbon-blue-700 transition"
+            disabled={loading}
+            className="w-full rounded-md bg-carbon-blue-500 text-white py-2 font-medium hover:bg-carbon-blue-700 transition disabled:opacity-50"
           >
-            Log In
+            {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
 

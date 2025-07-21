@@ -1,9 +1,0 @@
-mutation UpdateAppSetting($id: ID!, $data: UpdateAppSettingInput!) {
-  updateAppSetting(id: $id, data: $data) {
-    id
-    applicationName
-    lightboxMode
-    defaultSortOrder
-    updatedAt
-  }
-}

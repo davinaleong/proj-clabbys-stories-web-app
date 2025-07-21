@@ -1,9 +1,0 @@
-fragment GalleryFields on Gallery {
-  id
-  title
-  description
-  isPublished
-  userId
-  createdAt
-  updatedAt
-}
