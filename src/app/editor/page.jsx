@@ -113,9 +113,21 @@ export default function HomePage() {
 
           // ✅ Prefer gallery.date, fallback to createdAt
           const rawDate = gallery.date || gallery.createdAt
-          const formattedDate = rawDate
-            ? formatDate(rawDate, "EEE_DD_MMM_YYYY")
-            : "No date set"
+
+          // ✅ Ensure we always have a valid Date object
+          let formattedDate = "No date set"
+          if (rawDate) {
+            const parsedDate = !isNaN(Number(rawDate))
+              ? new Date(Number(rawDate)) // treat as timestamp
+              : new Date(rawDate) // treat as ISO string
+
+            if (!isNaN(parsedDate)) {
+              formattedDate = formatDate(
+                parsedDate.toISOString(),
+                "EEE_DD_MMM_YYYY"
+              )
+            }
+          }
 
           return (
             <GalleryCard
