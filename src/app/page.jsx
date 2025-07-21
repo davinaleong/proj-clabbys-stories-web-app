@@ -8,16 +8,13 @@ import { env } from "./lib/env"
 import logo from "./assets/logos/logo-midnight.png"
 import iconEye from "./assets/icons/eye.svg"
 import iconEyeClosed from "./assets/icons/eye-closed.svg"
+import iconLoaderWhite from "./assets/icons/loader-circle-w.svg"
 
 // ✅ GraphQL Login Mutation
 const LOGIN_USER = gql`
   mutation LoginUser($email: String!, $password: String!) {
     loginUser(email: $email, password: $password) {
-      user {
-        id
-        name
-        email
-      }
+      token
     }
   }
 `
@@ -27,6 +24,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false) // ✅ toggle state
   const [status, setStatus] = useState("")
+  const [loginSuccess, setLoginSuccess] = useState(false) // ✅ success state
 
   const router = useRouter()
 
@@ -40,15 +38,23 @@ export default function LoginPage() {
     setStatus("Logging in...")
 
     try {
-      const { data } = await loginUser({ variables: { email, password } })
-      if (data?.loginUser?.user) {
-        setStatus(`Welcome, ${data.loginUser.user.name}!`)
-        router.push("/editor") // ✅ Redirect after cookie is set
+      const { data } = await loginUser({
+        variables: { email: email.trim(), password: password.trim() },
+      })
+
+      if (data?.loginUser?.token) {
+        setStatus("Login successful!")
+        setLoginSuccess(true) // ✅ trigger loader
+        // Wait 800ms for loader animation before redirect
+        setTimeout(() => {
+          router.push("/editor")
+        }, 800)
       } else {
         setStatus("Invalid credentials")
       }
     } catch (err) {
-      console.error(err)
+      console.error("GraphQL Error:", err.graphQLErrors)
+      console.error("Network Error:", err.networkError)
       setStatus("Login failed. Check email & password.")
     }
   }
@@ -110,10 +116,25 @@ export default function LoginPage() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-carbon-blue-500 text-white py-2 font-medium hover:bg-carbon-blue-700 transition disabled:opacity-50"
+            disabled={loading || loginSuccess} // ✅ disabled when logging or success
+            className="w-full rounded-md bg-carbon-blue-500 text-white py-2 font-medium hover:bg-carbon-blue-700 transition disabled:opacity-50 flex justify-center items-center gap-2"
           >
-            {loading ? "Logging in..." : "Log In"}
+            {loginSuccess ? (
+              <>
+                <Image
+                  src={iconLoaderWhite}
+                  alt="Loading..."
+                  width={20}
+                  height={20}
+                  className="animate-spin"
+                />
+                Redirecting...
+              </>
+            ) : loading ? (
+              "Logging in..."
+            ) : (
+              "Log In"
+            )}
           </button>
 
           {/* Status Message */}
