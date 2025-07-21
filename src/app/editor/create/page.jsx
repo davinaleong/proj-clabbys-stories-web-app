@@ -1,6 +1,7 @@
 "use client"
 import { gql, useMutation } from "@apollo/client"
 import Image from "next/image"
+import { useRouter } from "next/navigation" // ✅ import router
 import { useState, useRef } from "react"
 import checkIcon from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
@@ -21,6 +22,8 @@ const CREATE_GALLERY = gql`
 `
 
 export default function CreateGalleryPage() {
+  const router = useRouter() // ✅ initialize router
+
   const [createGalleryMutation] = useMutation(CREATE_GALLERY)
 
   // ✅ Form state
@@ -59,7 +62,6 @@ export default function CreateGalleryPage() {
     setSaving(true) // ✅ start saving state
 
     try {
-      // ✅ Always create as draft
       const newGalleryData = {
         title: title.trim(),
         description: description.trim(),
@@ -67,13 +69,23 @@ export default function CreateGalleryPage() {
         status: "DRAFT", // always draft on create
       }
 
-      await createGalleryMutation({
+      const { data } = await createGalleryMutation({
         variables: { data: newGalleryData },
       })
 
-      setToastType("success")
-      setToastMessage("✅ Gallery created successfully!")
-      // ✅ Optionally redirect after create
+      if (data?.createGallery?.id) {
+        const newGalleryId = data.createGallery.id
+
+        setToastType("success")
+        setToastMessage("✅ Gallery created successfully!")
+
+        // ✅ Redirect user to the editor page for this gallery
+        setTimeout(() => {
+          router.push(`/editor/${newGalleryId}`)
+        }, 800) // short delay to show toast
+      } else {
+        throw new Error("No gallery ID returned")
+      }
     } catch (err) {
       console.error("Create failed:", err)
       setToastType("error")
