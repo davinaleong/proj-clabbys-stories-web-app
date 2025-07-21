@@ -20,6 +20,7 @@ import { CSS } from "@dnd-kit/utilities"
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
 import checkIcon from "./../../assets/icons/check.svg"
+import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import Toast from "./../../components/Toast"
 import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
@@ -117,6 +118,9 @@ export default function UpdateGalleryPage() {
   const [isPickerOpen, setPickerOpen] = useState(false)
   const dateFieldRef = useRef(null)
 
+  // ✅ New: saving state for Save button
+  const [saving, setSaving] = useState(false)
+
   useEffect(() => {
     if (data?.gallery) {
       const g = data.gallery
@@ -179,6 +183,8 @@ export default function UpdateGalleryPage() {
       return
     }
 
+    setSaving(true) // ✅ start saving
+
     try {
       // ✅ Convert date to ISO
       let isoDate = null
@@ -198,16 +204,15 @@ export default function UpdateGalleryPage() {
       const updateData = {
         title: editedTitle,
         description: editedDescription,
-        date: isoDate, // backend expects ISO
+        date: isoDate,
         status: editedStatus,
       }
 
-      // ✅ Only include passphrase if user actually edited it
       if (actualPassphrase && actualPassphrase !== "Set a passphrase") {
         updateData.passphrase = actualPassphrase
       }
 
-      // ✅ Save gallery details (title, desc, date, passphraseHash)
+      // ✅ Save gallery details
       await updateGalleryMutation({
         variables: { id: galleryId, data: updateData },
       })
@@ -225,6 +230,8 @@ export default function UpdateGalleryPage() {
       console.error("Save failed:", err)
       setToastType("error")
       setToastMessage("❌ Failed to save gallery. Try again.")
+    } finally {
+      setSaving(false) // ✅ end saving
     }
   }
 
@@ -266,15 +273,37 @@ export default function UpdateGalleryPage() {
         </h1>
 
         <button
-          className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-carbon-blue-500"
           onClick={handleSave}
+          disabled={saving}
+          className={`flex gap-2 items-center px-4 py-2 rounded-md transition ${
+            saving
+              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
+              : "bg-carbon-blue-700 hover:bg-carbon-blue-500 text-white"
+          }`}
         >
-          <Image src={checkIcon} alt="Check Icon" width={16} height={16} /> Save
+          {saving ? (
+            <>
+              <Image
+                src={iconLoaderWhite}
+                alt="Saving..."
+                width={18}
+                height={18}
+                className="animate-spin"
+              />
+              Saving&hellip;
+            </>
+          ) : (
+            <>
+              <Image src={checkIcon} alt="Check Icon" width={16} height={16} />
+              Save
+            </>
+          )}
         </button>
       </header>
 
       {/* ✅ Editable Fields */}
       <section>
+        {/* Description */}
         <p
           className="text-gray-800 outline-none"
           contentEditable
@@ -285,10 +314,10 @@ export default function UpdateGalleryPage() {
         </p>
 
         {/* ✅ Clickable Date Field */}
-        <div className="relative inline-block">
+        <div className="relative">
           <p
             ref={dateFieldRef}
-            className="text-gray-800 outline-none"
+            className="text-gray-800 outline-none cursor-pointer"
             onClick={() => setPickerOpen((prev) => !prev)}
           >
             {editedDate || "No date is set"}
@@ -301,52 +330,21 @@ export default function UpdateGalleryPage() {
             onClose={() => setPickerOpen(false)}
             outputFormat="EEEE_D_MMM_YYYY"
             onDateSelected={({ iso, formatted }) => {
-              setEditedDate(formatted) // show a pretty date
-              setIsoDateValue(iso) // store ISO for saving
+              setEditedDate(formatted)
+              setIsoDateValue(iso)
             }}
           />
         </div>
 
-        {/* ✅ Passphrase */}
-        <p
-          className="text-gray-700 outline-none"
-          contentEditable
-          suppressContentEditableWarning
-          onFocus={(e) => (e.currentTarget.textContent = maskedPassphrase)}
-          onInput={(e) => {
-            const text = e.currentTarget.textContent || ""
-            if (text.length > maskedPassphrase.length) {
-              const newChar = text.slice(-1)
-              setActualPassphrase((prev) => prev + newChar)
-            } else if (text.length < maskedPassphrase.length) {
-              setActualPassphrase((prev) => prev.slice(0, -1))
-            }
-            e.currentTarget.textContent = actualPassphrase.replace(/./g, "*")
-            const range = document.createRange()
-            const sel = window.getSelection()
-            range.selectNodeContents(e.currentTarget)
-            range.collapse(false)
-            sel.removeAllRanges()
-            sel.addRange(range)
-          }}
-          onBlur={(e) =>
-            (e.currentTarget.textContent =
-              maskedPassphrase || "Set a passphrase")
-          }
-        >
-          {maskedPassphrase || "Set a passphrase"}
-        </p>
-
-        {/* ✅ Status Field */}
-        <div className="relative inline-block">
+        {/* ✅ Status Picker */}
+        <div className="relative">
           <p
             ref={statusFieldRef}
-            className="text-gray-800 outline-none"
+            className="text-gray-800 outline-none cursor-pointer"
             onClick={() => setStatusOpen((prev) => !prev)}
           >
-            {editedStatus === "DRAFT" ? "Draft" : "Published"}
+            {editedStatus}
           </p>
-
           <StatusPicker
             anchorRef={statusFieldRef}
             isOpen={isStatusOpen}
@@ -358,12 +356,8 @@ export default function UpdateGalleryPage() {
         </div>
       </section>
 
-      {/* ✅ Photos with drag-and-drop */}
+      {/* ✅ Photos drag-and-drop */}
       <section className="mt-6">
-        <h2 className="text-lg font-semibold text-carbon-blue-700 mb-4 sr-only">
-          Photos
-        </h2>
-
         {photos.length === 0 ? (
           <p className="text-gray-500">No photos in this gallery yet.</p>
         ) : (

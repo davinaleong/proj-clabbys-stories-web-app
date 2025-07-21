@@ -1,17 +1,17 @@
 "use client"
 import { useEffect, useRef } from "react"
+import STATUSES from "./../db/gallery-statuses" // adjust the path if needed
 
 export default function StatusPicker({
   anchorRef,
   isOpen,
-  options = [],
   currentStatus,
   onClose,
   onSelect,
 }) {
   const menuRef = useRef(null)
 
-  // ✅ Close when clicking outside
+  // ✅ Close picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -23,6 +23,7 @@ export default function StatusPicker({
         onClose()
       }
     }
+
     if (isOpen) document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [isOpen, onClose, anchorRef])
@@ -41,21 +42,22 @@ export default function StatusPicker({
       <div className="text-sm font-semibold text-gray-700 mb-2">
         Select Status
       </div>
+
       <div className="space-y-2">
-        {options.map((opt) => (
+        {Object.entries(STATUSES).map(([key, label]) => (
           <button
-            key={opt.name}
+            key={key}
             onClick={() => {
-              onSelect(opt.name)
+              onSelect(key) // returns the status key (DRAFT, PRIVATE, PUBLISHED)
               onClose()
             }}
             className={`w-full text-left px-3 py-2 rounded-sm text-sm ${
-              currentStatus === opt.name
+              currentStatus === key
                 ? "bg-carbon-blue-500 text-white"
                 : "bg-neutral-100 hover:bg-neutral-200"
             }`}
           >
-            {opt.name === "DRAFT" ? "Draft" : "Published"}
+            {label}
           </button>
         ))}
       </div>

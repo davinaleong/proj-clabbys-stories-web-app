@@ -1,7 +1,8 @@
 "use client"
 import { gql, useQuery } from "@apollo/client"
 import Image from "next/image"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 // ✅ Utilities
 import { formatDate } from "../utils/format-date"
@@ -11,6 +12,7 @@ import GalleryCard from "./../components/GalleryCard"
 
 // ✅ Icons
 import plusIcon from "./../assets/icons/plus.svg"
+import iconLoaderWhite from "./../assets/icons/loader-circle-w.svg"
 
 // ✅ Fetch ALL galleries with photos + status
 const GET_ALL_GALLERIES = gql`
@@ -37,6 +39,17 @@ export default function HomePage() {
     fetchPolicy: "no-cache",
   })
 
+  const router = useRouter()
+  const [creating, setCreating] = useState(false)
+
+  const handleCreateClick = () => {
+    setCreating(true)
+    // Simulate a tiny delay before navigation (to show spinner briefly)
+    setTimeout(() => {
+      router.push("/editor/create")
+    }, 200)
+  }
+
   if (loading) {
     return (
       <main className="flex justify-center items-center h-screen">
@@ -62,12 +75,34 @@ export default function HomePage() {
         <h1 className="font-serif text-3xl font-bold text-carbon-blue-700">
           Galleries
         </h1>
-        <Link
-          href="/editor/create"
-          className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md hover:bg-carbon-blue-800"
+
+        <button
+          onClick={handleCreateClick}
+          disabled={creating}
+          className={`flex gap-2 items-center px-4 py-2 rounded-md transition ${
+            creating
+              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
+              : "bg-carbon-blue-700 hover:bg-carbon-blue-800 text-white"
+          }`}
         >
-          <Image src={plusIcon} alt="Plus Icon" width={16} height={16} /> Create
-        </Link>
+          {creating ? (
+            <>
+              <Image
+                src={iconLoaderWhite}
+                alt="Loading..."
+                width={18}
+                height={18}
+                className="animate-spin"
+              />
+              Creating...
+            </>
+          ) : (
+            <>
+              <Image src={plusIcon} alt="Plus Icon" width={16} height={16} />{" "}
+              Create
+            </>
+          )}
+        </button>
       </header>
 
       {/* ✅ Galleries Grid */}

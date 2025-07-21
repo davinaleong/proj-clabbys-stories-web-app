@@ -2,8 +2,8 @@
 import { gql, useMutation } from "@apollo/client"
 import Image from "next/image"
 import { useState, useRef } from "react"
-import dayjs from "dayjs"
 import checkIcon from "./../../assets/icons/check.svg"
+import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import Toast from "./../../components/Toast"
 import DatePicker from "./../../components/DatePicker"
 
@@ -33,6 +33,9 @@ export default function CreateGalleryPage() {
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState("success")
 
+  // ✅ Saving state for button
+  const [saving, setSaving] = useState(false)
+
   // ✅ Date Picker modal state
   const [isPickerOpen, setPickerOpen] = useState(false)
   const dateFieldRef = useRef(null)
@@ -52,6 +55,8 @@ export default function CreateGalleryPage() {
       setToastMessage(errorMsg)
       return
     }
+
+    setSaving(true) // ✅ start saving state
 
     try {
       // ✅ Always create as draft
@@ -73,6 +78,8 @@ export default function CreateGalleryPage() {
       console.error("Create failed:", err)
       setToastType("error")
       setToastMessage("❌ Failed to create gallery. Try again.")
+    } finally {
+      setSaving(false) // ✅ reset saving state
     }
   }
 
@@ -98,10 +105,31 @@ export default function CreateGalleryPage() {
         </h1>
 
         <button
-          className="flex gap-2 items-center bg-carbon-blue-700 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-carbon-blue-500"
+          className={`flex gap-2 items-center px-4 py-2 rounded-md transition ${
+            saving
+              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
+              : "bg-carbon-blue-700 hover:bg-carbon-blue-500 text-white"
+          }`}
           onClick={handleCreate}
+          disabled={saving}
         >
-          <Image src={checkIcon} alt="Check Icon" width={16} height={16} /> Save
+          {saving ? (
+            <>
+              <Image
+                src={iconLoaderWhite}
+                alt="Saving..."
+                width={18}
+                height={18}
+                className="animate-spin"
+              />
+              Saving&hellip;
+            </>
+          ) : (
+            <>
+              <Image src={checkIcon} alt="Check Icon" width={16} height={16} />
+              Save
+            </>
+          )}
         </button>
       </header>
 
