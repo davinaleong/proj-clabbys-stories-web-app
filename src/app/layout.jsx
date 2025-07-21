@@ -1,4 +1,5 @@
 import { Montserrat, Playfair } from "next/font/google"
+import { ApolloWrapper } from "./components/ApolloWrapper"
 import { env } from "./lib/env"
 import "./globals.css"
 
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${montserrat.variable} ${playfair.variable} antialiased`}
       >
-        {children}
+        <ApolloWrapper>{children}</ApolloWrapper>
       </body>
     </html>
   )

@@ -1,16 +1,16 @@
 "use client"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
 import { useState } from "react"
 import { gql, useMutation } from "@apollo/client"
 import { env } from "./lib/env"
 import logo from "./assets/logos/logo-midnight.png"
 
-// ✅ Inline GraphQL mutation for login
+// ✅ GraphQL Login Mutation
 const LOGIN_USER = gql`
   mutation LoginUser($email: String!, $password: String!) {
     loginUser(email: $email, password: $password) {
-      token
       user {
         id
         name
@@ -27,28 +27,24 @@ export default function LoginPage() {
 
   const router = useRouter()
 
-  // ✅ Apollo mutation hook
-  const [loginUser, { loading }] = useMutation(LOGIN_USER)
+  // Apollo mutation hook
+  const [loginUser, { loading }] = useMutation(LOGIN_USER, {
+    context: { fetchOptions: { credentials: "include" } }, // ✅ allow cookies
+  })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setStatus("Logging in...")
 
     try {
-      const { data } = await loginUser({
-        variables: { email, password },
-      })
-
-      if (data?.loginUser?.token) {
-        // ✅ Store token in localStorage (can switch to cookies later)
-        localStorage.setItem("auth_token", data.loginUser.token)
-
+      const { data } = await loginUser({ variables: { email, password } })
+      if (data?.loginUser?.user) {
         setStatus(`Welcome, ${data.loginUser.user.name}!`)
-        router.push("/editor") // ✅ Redirect to protected page
+        router.push("/editor") // ✅ Redirect after cookie is set
       } else {
         setStatus("Invalid credentials")
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err)
       setStatus("Login failed. Check email & password.")
     }
@@ -56,18 +52,17 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-pastel-pink-500">
-      <div className="flex flex-col items-center w-full max-w-xs px-4">
-        {/* Logo */}
-        <div className="mb-4">
-          <Image src={logo} alt="Logo" width={100} height={100} />
-        </div>
+      <section className="flex flex-col items-center flow w-full max-w-xs px-4">
+        <header className="flow">
+          <div className="flex justify-center">
+            <Image src={logo} alt="Logo" width={100} height={100} />
+          </div>
 
-        {/* App Name */}
-        <h1 className="text-2xl font-serif font-semibold text-carbon-blue-500 mb-6">
-          {env.APP_NAME}
-        </h1>
+          <h1 className="text-3xl text-center font-serif font-semibold text-carbon-blue-500">
+            {env.APP_NAME}
+          </h1>
+        </header>
 
-        {/* Login Form */}
         <form
           onSubmit={handleSubmit}
           className="w-full flex flex-col space-y-3"
@@ -97,15 +92,29 @@ export default function LoginPage() {
           >
             {loading ? "Logging in..." : "Log In"}
           </button>
+
+          {status && (
+            <p className="mt-3 text-sm text-carbon-blue-500 text-center">
+              {status}
+            </p>
+          )}
         </form>
 
-        {/* Status Message */}
-        {status && (
-          <p className="mt-3 text-sm text-carbon-blue-500 text-center">
-            {status}
+        <footer>
+          <p className="text-sm text-center">
+            This site uses a secure, essential cookie for login authentication.
+            No tracking or advertising cookies are used. By continuing to use
+            this site, you agree to our{" "}
+            <Link
+              href="/privacy"
+              className="text-carbon-blue-500 hover:underline"
+            >
+              Privacy Policy
+            </Link>
+            .
           </p>
-        )}
-      </div>
+        </footer>
+      </section>
     </main>
   )
 }
