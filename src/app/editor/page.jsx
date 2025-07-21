@@ -2,7 +2,7 @@
 import { gql, useQuery } from "@apollo/client"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 
 // ✅ Utilities
 import { formatDate } from "../utils/format-date"
@@ -14,43 +14,97 @@ import GalleryCard from "./../components/GalleryCard"
 import plusIcon from "./../assets/icons/plus.svg"
 import iconLoaderWhite from "./../assets/icons/loader-circle-w.svg"
 
-// ✅ Fetch ALL galleries with photos + status
-const GET_ALL_GALLERIES = gql`
-  query GetGalleries {
-    galleries {
-      __typename
-      id
-      title
-      description
-      date
-      createdAt
-      status
-      photos {
-        __typename
-        id
-        imageUrl
+// ✅ PAGINATED QUERY
+const GET_PAGINATED_GALLERIES = gql`
+  query GetPaginatedGalleries($after: String, $first: Int!) {
+    galleriesPaginated(after: $after, first: $first) {
+      edges {
+        cursor
+        node {
+          id
+          title
+          description
+          date
+          createdAt
+          status
+          photos {
+            id
+            imageUrl
+          }
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
 `
 
 export default function HomePage() {
-  const { data, loading, error } = useQuery(GET_ALL_GALLERIES, {
-    fetchPolicy: "no-cache",
-  })
-
   const router = useRouter()
   const [creating, setCreating] = useState(false)
 
-  const handleCreateClick = () => {
-    setCreating(true)
-    // Simulate a tiny delay before navigation (to show spinner briefly)
-    setTimeout(() => {
-      router.push("/editor/create")
-    }, 200)
+  // ✅ For infinite scroll
+  const [galleries, setGalleries] = useState([])
+  const [afterCursor, setAfterCursor] = useState(null)
+  const [hasNextPage, setHasNextPage] = useState(true)
+
+  const { data, loading, fetchMore, error } = useQuery(
+    GET_PAGINATED_GALLERIES,
+    {
+      variables: { after: null, first: 12 },
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "cache-and-network",
+      onCompleted: (res) => {
+        const { edges, pageInfo } = res.galleriesPaginated
+        setGalleries(edges.map((edge) => edge.node))
+        setAfterCursor(pageInfo.endCursor)
+        setHasNextPage(pageInfo.hasNextPage)
+      },
+    }
+  )
+
+  const loaderRef = useRef(null)
+
+  // ✅ Intersection observer for infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasNextPage) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0]
+        if (firstEntry.isIntersecting && hasNextPage) {
+          loadMoreGalleries()
+        }
+      },
+      { threshold: 1.0 }
+    )
+
+    observer.observe(loaderRef.current)
+
+    return () => observer.disconnect()
+  }, [loaderRef.current, hasNextPage])
+
+  const loadMoreGalleries = async () => {
+    if (!hasNextPage) return
+
+    const res = await fetchMore({
+      variables: { after: afterCursor, first: 12 },
+    })
+
+    const newEdges = res.data.galleriesPaginated.edges.map((edge) => edge.node)
+    setGalleries((prev) => [...prev, ...newEdges])
+    setAfterCursor(res.data.galleriesPaginated.pageInfo.endCursor)
+    setHasNextPage(res.data.galleriesPaginated.pageInfo.hasNextPage)
   }
 
-  if (loading) {
+  const handleCreateClick = () => {
+    setCreating(true)
+    setTimeout(() => router.push("/editor/create"), 200)
+  }
+
+  if (loading && galleries.length === 0) {
     return (
       <main className="flex justify-center items-center h-screen">
         <p className="text-carbon-blue-700 text-lg">Loading galleries...</p>
@@ -65,8 +119,6 @@ export default function HomePage() {
       </main>
     )
   }
-
-  const galleries = data?.galleries || []
 
   return (
     <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-8">
@@ -98,7 +150,7 @@ export default function HomePage() {
             </>
           ) : (
             <>
-              <Image src={plusIcon} alt="Plus Icon" width={16} height={16} />{" "}
+              <Image src={plusIcon} alt="Plus Icon" width={16} height={16} />
               Create
             </>
           )}
@@ -113,13 +165,11 @@ export default function HomePage() {
 
           // ✅ Prefer gallery.date, fallback to createdAt
           const rawDate = gallery.date || gallery.createdAt
-
-          // ✅ Ensure we always have a valid Date object
           let formattedDate = "No date set"
           if (rawDate) {
             const parsedDate = !isNaN(Number(rawDate))
-              ? new Date(Number(rawDate)) // treat as timestamp
-              : new Date(rawDate) // treat as ISO string
+              ? new Date(Number(rawDate))
+              : new Date(rawDate)
 
             if (!isNaN(parsedDate)) {
               formattedDate = formatDate(
@@ -142,6 +192,19 @@ export default function HomePage() {
           )
         })}
       </section>
+
+      {/* ✅ Infinite Scroll Loader */}
+      {hasNextPage && (
+        <div ref={loaderRef} className="flex justify-center py-6">
+          <Image
+            src={iconLoaderWhite}
+            alt="Loading more..."
+            width={24}
+            height={24}
+            className="animate-spin"
+          />
+        </div>
+      )}
     </main>
   )
 }
