@@ -77,7 +77,7 @@ const UPDATE_PHOTO_ORDER = gql`
   }
 `
 
-export default function GalleryPage() {
+export default function UpdateGalleryPage() {
   const params = useParams()
   const galleryId = params.id
 
