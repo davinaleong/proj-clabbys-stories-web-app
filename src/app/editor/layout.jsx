@@ -44,7 +44,10 @@ export default function EditorLayout({ children }) {
               <Image src={imageIcon} alt="Image Icon" width={16} height={16} />{" "}
               Photos
             </Link>
-            <Link href="#" className="flex gap-2 items-center hover:underline">
+            <Link
+              href="/editor/settings"
+              className="flex gap-2 items-center hover:underline"
+            >
               <Image
                 src={settingsIcon}
                 alt="Settings Icon"
@@ -96,7 +99,7 @@ export default function EditorLayout({ children }) {
               Photos
             </Link>
             <Link
-              href="#"
+              href="/editor/settings"
               className="flex gap-2 items-center py-2 px-6 hover:bg-carbon-blue-700"
             >
               <Image
