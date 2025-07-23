@@ -2,6 +2,7 @@
 import { gql, useQuery, useMutation } from "@apollo/client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { env } from "./../../lib/env"
 import EnumPicker from "./../../components/EnumPicker"
 import Toast from "./../../components/Toast"
 import Image from "next/image"
@@ -184,7 +185,7 @@ export default function SettingsPage() {
   // ✅ Export handler
   const handleExport = async () => {
     try {
-      const res = await fetch("/api/export", {
+      const res = await fetch(`${env.REST_API_URL}export`, {
         method: "GET",
         credentials: "include", // if you need cookies/session
       })
@@ -193,8 +194,20 @@ export default function SettingsPage() {
 
       // Get the filename from response header
       const disposition = res.headers.get("Content-Disposition")
-      const filenameMatch = disposition?.match(/filename="(.+)"/)
-      const filename = filenameMatch ? filenameMatch[1] : "export.xlsx"
+      let filename = "export.xlsx"
+      if (disposition) {
+        // Try filename*=UTF-8''<name>
+        const utf8Match = disposition.match(/filename\*\=UTF-8''([^;]+)/)
+        if (utf8Match?.[1]) {
+          filename = decodeURIComponent(utf8Match[1])
+        } else {
+          // Fallback to plain filename="<name>"
+          const simpleMatch = disposition.match(/filename="(.+?)"/)
+          if (simpleMatch?.[1]) {
+            filename = simpleMatch[1]
+          }
+        }
+      }
 
       // Convert response to Blob
       const blob = await res.blob()

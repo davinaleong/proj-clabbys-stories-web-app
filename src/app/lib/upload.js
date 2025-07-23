@@ -25,7 +25,7 @@ export async function uploadSingle(file) {
 
   const formData = buildFormData(file, "file")
 
-  const res = await fetch(env.UPLOAD_URL, {
+  const res = await fetch(`${env.REST_API_URL}upload`, {
     method: "POST",
     body: formData,
   })
@@ -48,7 +48,7 @@ export async function uploadMultiple(files) {
 
   const formData = buildFormData(files, "files")
 
-  const res = await fetch(`${env.UPLOAD_URL}/multi`, {
+  const res = await fetch(`${env.REST_API_URL}upload/multi`, {
     method: "POST",
     body: formData,
   })

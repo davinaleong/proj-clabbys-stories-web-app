@@ -5,7 +5,7 @@ import { ApolloClient, InMemoryCache } from "@apollo/client"
 import { env } from "./env"
 
 export const client = new ApolloClient({
-  uri: env.API_URL || "http://localhost:4000/graphql",
+  uri: env.GQL_API_URL || "http://localhost:4000/graphql",
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
