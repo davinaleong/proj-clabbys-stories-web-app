@@ -74,6 +74,7 @@ export default function SettingsPage() {
   const sortOrderOptions = enumData?.sortOrder?.enumValues || []
   const dateFormatOptions = enumData?.dateFormat?.enumValues || []
 
+  // ✅ Load from localStorage first
   useEffect(() => {
     const stored = localStorage.getItem("appSettings")
     if (stored) {
@@ -90,6 +91,7 @@ export default function SettingsPage() {
     }
   }, [])
 
+  // ✅ Also sync fresh GraphQL data
   useEffect(() => {
     const setting = data?.appSettings?.[0]
     if (setting) {
@@ -101,6 +103,7 @@ export default function SettingsPage() {
     }
   }, [data])
 
+  // ✅ Save Handler
   const handleSave = async () => {
     if (!settingId) return
     setSaving(true)
@@ -160,10 +163,40 @@ export default function SettingsPage() {
         onClose={() => setToastMessage("")}
       />
 
-      {/* ✅ Page Title */}
-      <h1 className="text-3xl font-serif text-carbon-blue-900 mb-8">
-        Settings
-      </h1>
+      {/* ✅ Heading + Save button on same row */}
+      <header className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-serif font-bold text-carbon-blue-900">
+          Settings
+        </h1>
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className={`flex gap-2 items-center px-5 py-2 rounded-md transition ${
+            saving
+              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
+              : "bg-carbon-blue-700 hover:bg-carbon-blue-500 text-white"
+          }`}
+        >
+          {saving ? (
+            <>
+              <Image
+                src={iconLoaderWhite}
+                alt="Saving..."
+                width={18}
+                height={18}
+                className="animate-spin"
+              />
+              Saving…
+            </>
+          ) : (
+            <>
+              <Image src={checkIcon} alt="Check Icon" width={16} height={16} />
+              Save
+            </>
+          )}
+        </button>
+      </header>
 
       {/* ✅ Two-column grid */}
       <section className="grid grid-cols-2 gap-y-6 text-carbon-blue-900">
@@ -236,37 +269,6 @@ export default function SettingsPage() {
           </button>
         </div>
       </section>
-
-      {/* ✅ Save button at bottom */}
-      <div className="mt-10">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className={`flex gap-2 items-center px-5 py-2 rounded-md transition ${
-            saving
-              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
-              : "bg-carbon-blue-700 hover:bg-carbon-blue-500 text-white"
-          }`}
-        >
-          {saving ? (
-            <>
-              <Image
-                src={iconLoaderWhite}
-                alt="Saving..."
-                width={18}
-                height={18}
-                className="animate-spin"
-              />
-              Saving…
-            </>
-          ) : (
-            <>
-              <Image src={checkIcon} alt="Check Icon" width={16} height={16} />
-              Save Changes
-            </>
-          )}
-        </button>
-      </div>
     </main>
   )
 }
