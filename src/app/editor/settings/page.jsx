@@ -1,6 +1,7 @@
 "use client"
 import { gql, useQuery, useMutation } from "@apollo/client"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import EnumPicker from "./../../components/EnumPicker"
 import Toast from "./../../components/Toast"
 import Image from "next/image"
@@ -51,13 +52,28 @@ const UPDATE_APP_SETTING = gql`
   }
 `
 
+// ✅ Logout mutation
+const LOGOUT_USER = gql`
+  mutation LogoutUser {
+    logoutUser {
+      success
+      message
+    }
+  }
+`
+
 export default function SettingsPage() {
+  const router = useRouter()
+
+  // ✅ Queries
   const { data, loading, error } = useQuery(GET_APP_SETTINGS, {
     fetchPolicy: "no-cache",
   })
   const { data: enumData } = useQuery(GET_SETTING_ENUMS)
   const [updateSettingMutation] = useMutation(UPDATE_APP_SETTING)
+  const [logoutUserMutation] = useMutation(LOGOUT_USER)
 
+  // ✅ State
   const [saving, setSaving] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState("success")
@@ -67,7 +83,6 @@ export default function SettingsPage() {
   const [lightboxMode, setLightboxMode] = useState("BLACK")
   const [sortOrder, setSortOrder] = useState("ALPHABETICAL")
   const [dateFormat, setDateFormat] = useState("EEE_DD_MMM_YYYY")
-
   const [openPicker, setOpenPicker] = useState(null)
 
   const lightboxOptions = enumData?.lightbox?.enumValues || []
@@ -91,7 +106,7 @@ export default function SettingsPage() {
     }
   }, [])
 
-  // ✅ Also sync fresh GraphQL data
+  // ✅ Sync fresh GraphQL data
   useEffect(() => {
     const setting = data?.appSettings?.[0]
     if (setting) {
@@ -103,7 +118,7 @@ export default function SettingsPage() {
     }
   }, [data])
 
-  // ✅ Save Handler
+  // ✅ Save handler
   const handleSave = async () => {
     if (!settingId) return
     setSaving(true)
@@ -135,6 +150,34 @@ export default function SettingsPage() {
       setToastMessage("❌ Failed to save settings. Try again.")
     } finally {
       setSaving(false)
+    }
+  }
+
+  // ✅ Logout handler
+  const handleLogout = async () => {
+    try {
+      const { data } = await logoutUserMutation()
+      if (data?.logoutUser?.success) {
+        // ✅ Clear all auth-related localStorage/session
+        localStorage.removeItem("appSettings")
+        localStorage.removeItem("authToken")
+
+        // Optionally show a message before redirect
+        setToastType("success")
+        setToastMessage("✅ Logged out successfully")
+
+        // Redirect after a short delay
+        setTimeout(() => {
+          router.push("/")
+        }, 500)
+      } else {
+        setToastType("error")
+        setToastMessage(data?.logoutUser?.message || "Logout failed!")
+      }
+    } catch (err) {
+      console.error("Logout failed:", err)
+      setToastType("error")
+      setToastMessage("❌ Failed to log out. Try again.")
     }
   }
 
@@ -264,7 +307,10 @@ export default function SettingsPage() {
         {/* Logout */}
         <div className="font-medium">Logout</div>
         <div>
-          <button className="text-carbon-blue-700 hover:underline">
+          <button
+            onClick={handleLogout}
+            className="text-carbon-blue-700 hover:underline"
+          >
             Logout
           </button>
         </div>
