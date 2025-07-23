@@ -181,6 +181,39 @@ export default function SettingsPage() {
     }
   }
 
+  // ✅ Export handler
+  const handleExport = async () => {
+    try {
+      const res = await fetch("/api/export", {
+        method: "GET",
+        credentials: "include", // if you need cookies/session
+      })
+
+      if (!res.ok) throw new Error("Export failed")
+
+      // Get the filename from response header
+      const disposition = res.headers.get("Content-Disposition")
+      const filenameMatch = disposition?.match(/filename="(.+)"/)
+      const filename = filenameMatch ? filenameMatch[1] : "export.xlsx"
+
+      // Convert response to Blob
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+
+      // Create a temp <a> link to trigger download
+      const link = document.createElement("a")
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error("Export failed", err)
+    }
+  }
+
   if (loading && !appName) {
     return (
       <main className="flex justify-center items-center h-screen">
@@ -299,7 +332,10 @@ export default function SettingsPage() {
         {/* Export Data */}
         <div className="font-medium">Export Data</div>
         <div>
-          <button className="text-carbon-blue-700 hover:underline">
+          <button
+            onClick={handleExport}
+            className="text-carbon-blue-700 hover:underline"
+          >
             Export
           </button>
         </div>
