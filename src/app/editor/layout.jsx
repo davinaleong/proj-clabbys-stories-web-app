@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { gql, useQuery } from "@apollo/client"
 import { env } from "../lib/env"
 import { ApolloWrapper } from "./../components/ApolloWrapper"
 
@@ -15,8 +16,40 @@ import settingsIcon from "./../assets/icons/settings.svg"
 import menuIcon from "./../assets/icons/menu.svg"
 import xIcon from "./../assets/icons/x.svg"
 
-export default function EditorLayout({ children }) {
+const GET_APP_SETTING_BY_ID = gql`
+  query GetAppSetting($id: ID!) {
+    appSetting(id: $id) {
+      id
+      applicationName
+      lightboxMode
+      defaultSortOrder
+      defaultDateFormat
+    }
+  }
+`
+
+export default function EditorLayout({ applicationName, children }) {
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const {
+    data: settingsData,
+    loading: settingsLoading,
+    error: settingsError,
+  } = useQuery(GET_APP_SETTING_BY_ID, {
+    variables: { id: env.APP_SETTINGS_UUID },
+    fetchPolicy: "no-cache",
+  })
+
+  // ✅ Save settings to localStorage when loaded
+  useEffect(() => {
+    if (settingsData?.appSetting) {
+      localStorage.setItem(
+        "appSettings",
+        JSON.stringify(settingsData.appSetting)
+      )
+      console.log("✅ App settings saved:", settingsData.appSetting)
+    }
+  }, [settingsData])
 
   return (
     <ApolloWrapper>
@@ -27,7 +60,8 @@ export default function EditorLayout({ children }) {
           <Link href="/editor" className="flex items-center gap-3">
             <Image src={whiteLogo} alt="Logo" width={40} height={40} />
             <span className="font-serif font-semibold text-lg">
-              {env.APP_NAME}
+              {settingsData.applicationName || "Clabby's Stories"}
+              {" - Editor"}
             </span>
           </Link>
 

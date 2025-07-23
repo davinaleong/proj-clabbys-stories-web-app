@@ -1,10 +1,9 @@
 export const env = {
-  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "Clabby's Stories Editor",
   APP_ENV: process.env.NEXT_PUBLIC_APP_ENV || "development",
   API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/graphql",
   UPLOAD_URL:
     process.env.NEXT_PUBLIC_UPLOAD_URL || "http://localhost:4000/api/upload",
-  LOGIN_HASH: process.env.NEXT_PUBLIC_LOGIN_HASH || "",
+  APP_SETTINGS_UUID: process.env.NEXT_PUBLIC_APP_SETTINGS_UUID || "",
 }
 
 // ✅ Optional helper to check required vars
