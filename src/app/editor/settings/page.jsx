@@ -194,11 +194,11 @@ export default function SettingsPage() {
       <section className="space-y-6">
         {/* App Name */}
         <div>
-          <label className="block text-sm text-gray-500 mb-1">
+          <label className="block text-sm text-carbon-blue-500 mb-1">
             Application Name
           </label>
           <p
-            className="text-lg text-gray-800 outline-none border-b border-gray-300 focus:border-carbon-blue-500"
+            className="text-lg text-carbon-blue-800 outline-none border-b border-carbon-blue-300 focus:border-carbon-blue-500"
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) => setAppName(e.currentTarget.textContent)}
@@ -209,11 +209,11 @@ export default function SettingsPage() {
 
         {/* Lightbox Mode */}
         <div className="relative">
-          <label className="block text-sm text-gray-500 mb-1">
+          <label className="block text-sm text-carbon-blue-500 mb-1">
             Lightbox Mode
           </label>
           <p
-            className="text-lg text-gray-800 outline-none cursor-pointer border-b border-gray-300"
+            className="text-lg text-carbon-blue-800 outline-none cursor-pointer border-b border-carbon-blue-300"
             onClick={() =>
               setOpenPicker(openPicker === "lightbox" ? null : "lightbox")
             }
@@ -235,11 +235,11 @@ export default function SettingsPage() {
 
         {/* Sort Order */}
         <div className="relative">
-          <label className="block text-sm text-gray-500 mb-1">
+          <label className="block text-sm text-carbon-blue-500 mb-1">
             Photo Sort Order
           </label>
           <p
-            className="text-lg text-gray-800 outline-none cursor-pointer border-b border-gray-300"
+            className="text-lg text-carbon-blue-800 outline-none cursor-pointer border-b border-carbon-blue-300"
             onClick={() =>
               setOpenPicker(openPicker === "sortOrder" ? null : "sortOrder")
             }
@@ -261,11 +261,11 @@ export default function SettingsPage() {
 
         {/* Date Format */}
         <div className="relative">
-          <label className="block text-sm text-gray-500 mb-1">
+          <label className="block text-sm text-carbon-blue-500 mb-1">
             Date Format
           </label>
           <p
-            className="text-lg text-gray-800 outline-none cursor-pointer border-b border-gray-300"
+            className="text-lg text-carbon-blue-800 outline-none cursor-pointer border-b border-carbon-blue-300"
             onClick={() =>
               setOpenPicker(openPicker === "dateFormat" ? null : "dateFormat")
             }
