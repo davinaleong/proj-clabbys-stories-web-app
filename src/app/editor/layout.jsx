@@ -10,7 +10,6 @@ import { env } from "../lib/env"
 import whiteLogo from "./../assets/logos/logo-white.png"
 import circleQuestionMarkIcon from "./../assets/icons/circle-question-mark.svg"
 import grid2x2Icon from "./../assets/icons/grid-2x2.svg"
-import imageIcon from "./../assets/icons/image.svg"
 import settingsIcon from "./../assets/icons/settings.svg"
 import menuIcon from "./../assets/icons/menu.svg"
 import xIcon from "./../assets/icons/x.svg"
@@ -79,13 +78,6 @@ export default function EditorLayout({ children }) {
             Galleries
           </Link>
           <Link
-            href="/editor/photos"
-            className="flex gap-2 items-center hover:underline"
-          >
-            <Image src={imageIcon} alt="Image Icon" width={16} height={16} />
-            Photos
-          </Link>
-          <Link
             href="/editor/settings"
             className="flex gap-2 items-center hover:underline"
           >
@@ -134,13 +126,6 @@ export default function EditorLayout({ children }) {
           >
             <Image src={grid2x2Icon} alt="Grid Icon" width={16} height={16} />
             Galleries
-          </Link>
-          <Link
-            href="/editor/photos"
-            className="flex gap-2 items-center py-2 px-6 hover:bg-carbon-blue-700"
-          >
-            <Image src={imageIcon} alt="Image Icon" width={16} height={16} />
-            Photos
           </Link>
           <Link
             href="/editor/settings"
