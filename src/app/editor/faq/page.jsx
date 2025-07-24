@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { getFromLocalStorage } from "./../../utils/local-storage"
 
-// ✅ Default fallback
 const DEFAULT_APP_NAME = "My"
 
 export default function FaqPage() {
@@ -80,6 +79,37 @@ export default function FaqPage() {
             <li>Oldest first</li>
             <li>Alphabetical A–Z</li>
             <li>Alphabetical Z–A</li>
+          </ul>
+        </>
+      ),
+    },
+    {
+      q: "What date formats can I choose in Settings?",
+      a: (
+        <>
+          You can pick from several date formats to display gallery dates:
+          <ul className="list-disc pl-5 space-y-1 mt-2">
+            <li>
+              <b>EEE_D_MMM_YYYY</b> → <i>Sun, 20 Jul 2025</i>
+            </li>
+            <li>
+              <b>EEEE_D_MMM_YYYY</b> → <i>Sunday, 20 Jul 2025</i>
+            </li>
+            <li>
+              <b>EEEE_D_MMMM_YYYY</b> → <i>Sunday, 20 July 2025</i>
+            </li>
+            <li>
+              <b>D_MMM_YYYY</b> → <i>20 Jul 2025</i>
+            </li>
+            <li>
+              <b>D_MMMM_YYYY</b> → <i>20 July 2025</i>
+            </li>
+            <li>
+              <b>D_MMM</b> → <i>20 Jul</i>
+            </li>
+            <li>
+              <b>D_MMMM</b> → <i>20 July</i>
+            </li>
           </ul>
         </>
       ),
