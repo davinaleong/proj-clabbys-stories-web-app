@@ -94,7 +94,10 @@ export default function EditorLayout({ children }) {
             />
             Settings
           </Link>
-          <Link href="#" className="flex gap-2 items-center hover:underline">
+          <Link
+            href="/editor/faq"
+            className="flex gap-2 items-center hover:underline"
+          >
             <Image
               src={circleQuestionMarkIcon}
               alt="FAQ Icon"
@@ -149,7 +152,7 @@ export default function EditorLayout({ children }) {
             Settings
           </Link>
           <Link
-            href="#"
+            href="/editor/faq"
             className="flex gap-2 items-center py-2 px-6 hover:bg-carbon-blue-700"
           >
             <Image
