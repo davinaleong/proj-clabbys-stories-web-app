@@ -4,7 +4,8 @@ import Image from "next/image"
 import { useRouter } from "next/navigation" // ✅ import router
 import { useState, useRef } from "react"
 import checkIcon from "./../../assets/icons/check.svg"
-import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
+import loaderIcon from "./../../assets/icons/loader-circle-w.svg"
+import imageIcon from "./../../assets/icons/image.svg"
 import Toast from "./../../components/Toast"
 import DatePicker from "./../../components/DatePicker"
 
@@ -116,33 +117,44 @@ export default function CreateGalleryPage() {
           {title}
         </h1>
 
-        <button
-          className={`flex gap-2 items-center px-4 py-2 rounded-md transition ${
-            saving
-              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
-              : "bg-carbon-blue-700 hover:bg-carbon-blue-500 text-white"
-          }`}
-          onClick={handleCreate}
-          disabled={saving}
-        >
-          {saving ? (
-            <>
-              <Image
-                src={iconLoaderWhite}
-                alt="Saving..."
-                width={18}
-                height={18}
-                className="animate-spin"
-              />
-              Saving&hellip;
-            </>
-          ) : (
-            <>
-              <Image src={checkIcon} alt="Check Icon" width={16} height={16} />
-              Save
-            </>
-          )}
-        </button>
+        <div className="flex gap-2">
+          <button
+            className={`flex gap-2 items-center px-4 py-2 text-white rounded-md transition ${
+              saving
+                ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
+                : "bg-carbon-blue-500 hover:bg-carbon-blue-700"
+            }`}
+            onClick={handleCreate}
+            disabled={saving}
+          >
+            {saving ? (
+              <>
+                <Image
+                  src={loaderIcon}
+                  alt="Saving..."
+                  width={18}
+                  height={18}
+                  className="animate-spin"
+                />
+                Saving&hellip;
+              </>
+            ) : (
+              <>
+                <Image
+                  src={checkIcon}
+                  alt="Check Icon"
+                  width={16}
+                  height={16}
+                />
+                Save
+              </>
+            )}
+          </button>
+          <button className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-500 text-white opacity-80 cursor-not-allowed">
+            <Image src={imageIcon} alt="Image Icon" width={16} height={16} />
+            Manage Photos
+          </button>
+        </div>
       </header>
 
       {/* ✅ Description */}

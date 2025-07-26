@@ -272,33 +272,44 @@ export default function UpdateGalleryPage() {
           {editedTitle}
         </h1>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className={`flex gap-2 items-center px-4 py-2 rounded-md transition ${
-            saving
-              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
-              : "bg-carbon-blue-700 hover:bg-carbon-blue-500 text-white"
-          }`}
-        >
-          {saving ? (
-            <>
-              <Image
-                src={iconLoaderWhite}
-                alt="Saving..."
-                width={18}
-                height={18}
-                className="animate-spin"
-              />
-              Saving&hellip;
-            </>
-          ) : (
-            <>
-              <Image src={checkIcon} alt="Check Icon" width={16} height={16} />
-              Save
-            </>
-          )}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className={`flex gap-2 items-center px-4 py-2 rounded-md  text-white transition ${
+              saving
+                ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
+                : "bg-carbon-blue-500 hover:bg-carbon-blue-700"
+            }`}
+          >
+            {saving ? (
+              <>
+                <Image
+                  src={iconLoaderWhite}
+                  alt="Saving..."
+                  width={18}
+                  height={18}
+                  className="animate-spin"
+                />
+                Saving&hellip;
+              </>
+            ) : (
+              <>
+                <Image
+                  src={checkIcon}
+                  alt="Check Icon"
+                  width={16}
+                  height={16}
+                />
+                Save
+              </>
+            )}
+          </button>
+          <button className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-500 text-white opacity-80 cursor-not-allowed">
+            <Image src={imageIcon} alt="Image Icon" width={16} height={16} />
+            Manage Photos
+          </button>
+        </div>
       </header>
 
       {/* ✅ Editable Fields */}
