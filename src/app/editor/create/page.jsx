@@ -3,11 +3,12 @@ import { gql, useMutation } from "@apollo/client"
 import Image from "next/image"
 import { useRouter } from "next/navigation" // ✅ import router
 import { useState, useRef } from "react"
+import Toast from "./../../components/Toast"
+import DatePicker from "./../../components/DatePicker"
+import PhotosManager from "./../../components/PhotoManager"
 import checkIcon from "./../../assets/icons/check.svg"
 import loaderIcon from "./../../assets/icons/loader-circle-w.svg"
 import imageIcon from "./../../assets/icons/image.svg"
-import Toast from "./../../components/Toast"
-import DatePicker from "./../../components/DatePicker"
 
 // ✅ Mutation for creating a gallery
 const CREATE_GALLERY = gql`
@@ -43,6 +44,8 @@ export default function CreateGalleryPage() {
   // ✅ Date Picker modal state
   const [isPickerOpen, setPickerOpen] = useState(false)
   const dateFieldRef = useRef(null)
+
+  const [isPhotosModalOpen, setPhotosModalOpen] = useState(false)
 
   const validateForm = () => {
     if (!title.trim()) return "Title cannot be empty."
@@ -96,6 +99,10 @@ export default function CreateGalleryPage() {
     }
   }
 
+  const handleManagePhotos = () => {
+    setPhotosModalOpen(true) // ✅ open photo manager modal
+  }
+
   return (
     <main className="relative flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 flow">
       {/* ✅ Toast */}
@@ -104,6 +111,16 @@ export default function CreateGalleryPage() {
         message={toastMessage}
         type={toastType}
         onClose={() => setToastMessage("")}
+      />
+
+      <PhotosManager
+        isOpen={isPhotosModalOpen}
+        onClose={() => setPhotosModalOpen(false)}
+        galleryTitle={title}
+        onAddPhotos={({ files, metadata }) => {
+          // TODO: upload logic -> call your GraphQL mutation
+          console.log(files, metadata)
+        }}
       />
 
       {/* ✅ Title + Save Button */}
@@ -150,7 +167,10 @@ export default function CreateGalleryPage() {
               </>
             )}
           </button>
-          <button className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-500 text-white opacity-80 cursor-not-allowed">
+          <button
+            className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-500 text-white opacity-80 cursor-not-allowed"
+            onClick={handleManagePhotos}
+          >
             <Image src={imageIcon} alt="Image Icon" width={16} height={16} />
             Manage Photos
           </button>
