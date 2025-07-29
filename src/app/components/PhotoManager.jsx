@@ -1,6 +1,7 @@
 "use client"
 import { useState, useRef } from "react"
 import { gql, useMutation } from "@apollo/client"
+import { env } from "./../lib/env"
 import banIcon from "./../assets/icons/ban.svg"
 import plusBIcon from "./../assets/icons/plus-b.svg"
 import plusIcon from "./../assets/icons/plus.svg"
@@ -103,7 +104,7 @@ export default function PhotosManager({ isOpen, onClose, galleryId }) {
       const formData = new FormData()
       photoData.forEach((p) => formData.append("files", p.file))
 
-      const res = await fetch("/api/upload/multi", {
+      const res = await fetch(`${env.REST_API_URL}upload/multi`, {
         method: "POST",
         body: formData,
       })

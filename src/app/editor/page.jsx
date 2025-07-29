@@ -131,10 +131,10 @@ export default function HomePage() {
         <button
           onClick={handleCreateClick}
           disabled={creating}
-          className={`flex gap-2 items-center px-4 py-2 rounded-md transition ${
+          className={`flex gap-2 items-center text-white px-4 py-2 rounded-md transition ${
             creating
               ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
-              : "bg-carbon-blue-700 hover:bg-carbon-blue-800 text-white"
+              : "bg-carbon-blue-700 hover:bg-carbon-blue-800"
           }`}
         >
           {creating ? (
