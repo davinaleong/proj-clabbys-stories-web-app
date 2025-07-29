@@ -19,9 +19,11 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
-import checkIcon from "./../../assets/icons/check.svg"
+import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
+import iconImage from "./../../assets/icons/image.svg"
 import Toast from "./../../components/Toast"
+import PhotosManager from "./../../components/PhotosManager"
 import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
 
@@ -120,6 +122,8 @@ export default function UpdateGalleryPage() {
 
   // ✅ New: saving state for Save button
   const [saving, setSaving] = useState(false)
+
+  const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
 
   useEffect(() => {
     if (data?.gallery) {
@@ -253,14 +257,6 @@ export default function UpdateGalleryPage() {
 
   return (
     <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 flow sm:px-6 py-8">
-      {/* ✅ Toast */}
-      <Toast
-        className="mt-0"
-        message={toastMessage}
-        type={toastType}
-        onClose={() => setToastMessage("")}
-      />
-
       {/* ✅ Title + Save */}
       <header className="flex justify-between items-center">
         <h1
@@ -296,7 +292,7 @@ export default function UpdateGalleryPage() {
             ) : (
               <>
                 <Image
-                  src={checkIcon}
+                  src={iconCheck}
                   alt="Check Icon"
                   width={16}
                   height={16}
@@ -305,8 +301,11 @@ export default function UpdateGalleryPage() {
               </>
             )}
           </button>
-          <button className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-500 text-white opacity-80 cursor-not-allowed">
-            <Image src={imageIcon} alt="Image Icon" width={16} height={16} />
+          <button
+            onClick={() => setPhotoManagerOpen(true)}
+            className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-700 text-white"
+          >
+            <Image src={iconImage} alt="Image Icon" width={16} height={16} />
             Manage Photos
           </button>
         </div>
@@ -390,6 +389,21 @@ export default function UpdateGalleryPage() {
           </DndContext>
         )}
       </section>
+
+      {/* ✅ Toast */}
+      <Toast
+        className="mt-0"
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastMessage("")}
+      />
+
+      {/* ✅ Photos Manager */}
+      <PhotosManager
+        isOpen={isPhotoManagerOpen}
+        onClose={() => setPhotoManagerOpen(false)}
+        galleryId={galleryId}
+      />
     </main>
   )
 }

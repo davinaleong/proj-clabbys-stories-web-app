@@ -1,7 +1,7 @@
 "use client"
 import { useState, useRef } from "react"
 import { gql, useMutation } from "@apollo/client"
-import { env } from "./../lib/env"
+import { env } from "../lib/env"
 import banIcon from "./../assets/icons/ban.svg"
 import plusBIcon from "./../assets/icons/plus-b.svg"
 import plusIcon from "./../assets/icons/plus.svg"
@@ -118,10 +118,7 @@ export default function PhotosManager({ isOpen, onClose, galleryId }) {
         title: photoData[idx].title,
         description: photoData[idx].description,
         imageUrl: uploaded.secure_url,
-        thumbUrl: uploaded.secure_url,
-        caption: photoData[idx].description,
         takenAt: photoData[idx].isoDate,
-        fileSize: uploaded.bytes,
       }))
 
       // ✅ Call GraphQL createPhotos
