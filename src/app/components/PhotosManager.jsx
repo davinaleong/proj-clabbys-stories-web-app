@@ -5,6 +5,7 @@ import { env } from "../lib/env"
 import banIcon from "./../assets/icons/ban.svg"
 import plusBIcon from "./../assets/icons/plus-b.svg"
 import plusIcon from "./../assets/icons/plus.svg"
+import loaderCircleIcon from "./../assets/icons/loader-circle.svg"
 import DatePicker from "./DatePicker"
 import Image from "next/image"
 
@@ -336,9 +337,22 @@ export default function PhotosManager({
             disabled={photoData.length === 0 || uploading}
           >
             <Image
-              src={photoData.length === 0 || uploading ? plusBIcon : plusIcon}
-              alt="Add Icon"
-            />{" "}
+              src={
+                uploading
+                  ? loaderCircleIcon
+                  : photoData.length === 0
+                  ? plusBIcon
+                  : plusIcon
+              }
+              alt={
+                uploading
+                  ? "Uploading..."
+                  : photoData.length === 0
+                  ? "Disabled Add Icon"
+                  : "Add Icon"
+              }
+              className={uploading ? "animate-spin" : ""}
+            />
             {uploading ? "Uploading…" : `Add`}
           </button>
         </div>
