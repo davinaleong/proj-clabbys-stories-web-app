@@ -5,6 +5,7 @@ export const env = {
   REST_API_URL:
     process.env.NEXT_PUBLIC_REST_API_URL || "http://localhost:4000/api/",
   APP_SETTINGS_UUID: process.env.NEXT_PUBLIC_APP_SETTINGS_UUID || "",
+  DEFAULT_PASSPHRASE: process.env.NEXT_PUBLIC_DEFAULT_PASSPHRASE || "",
 }
 
 // ✅ Optional helper to check required vars

@@ -12,13 +12,12 @@ import {
 } from "@dnd-kit/core"
 import {
   SortableContext,
-  useSortable,
   arrayMove,
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
+import { env } from "../../lib/env"
 import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import iconImage from "./../../assets/icons/image.svg"
@@ -213,7 +212,7 @@ export default function UpdateGalleryPage() {
         status: editedStatus,
       }
 
-      if (actualPassphrase && actualPassphrase !== "Set a passphrase") {
+      if (actualPassphrase && actualPassphrase !== env.DEFAULT_PASSPHRASE) {
         updateData.passphrase = actualPassphrase
       }
 
@@ -346,6 +345,19 @@ export default function UpdateGalleryPage() {
             }}
           />
         </div>
+
+        {editedStatus === "PRIVATE" && (
+          <p
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) =>
+              setActualPassphrase(e.currentTarget.textContent || "")
+            }
+            className="text-gray-800 outline-none cursor-pointer"
+          >
+            {actualPassphrase}
+          </p>
+        )}
 
         {/* ✅ Status Picker */}
         <div className="relative">
