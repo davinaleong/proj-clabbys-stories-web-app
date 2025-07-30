@@ -18,7 +18,12 @@ const CREATE_PHOTOS = gql`
   }
 `
 
-export default function PhotosManager({ isOpen, onClose, galleryId }) {
+export default function PhotosManager({
+  isOpen,
+  onClose,
+  galleryId,
+  onUploadComplete,
+}) {
   const [photoData, setPhotoData] = useState([])
   const [errors, setErrors] = useState([])
   const [uploading, setUploading] = useState(false)
@@ -100,7 +105,7 @@ export default function PhotosManager({ isOpen, onClose, galleryId }) {
     setErrors([])
 
     try {
-      // ✅ Upload all files in one request
+      // ✅ Upload all files to Cloudinary
       const formData = new FormData()
       photoData.forEach((p) => formData.append("files", p.file))
 
@@ -110,9 +115,9 @@ export default function PhotosManager({ isOpen, onClose, galleryId }) {
       })
 
       if (!res.ok) throw new Error("Multi-upload failed")
-      const { results } = await res.json() // same order as photoData
+      const { results } = await res.json()
 
-      // ✅ Build GQL payload per photo
+      // ✅ Build GraphQL payload
       const gqlPayload = results.map((uploaded, idx) => ({
         galleryId,
         title: photoData[idx].title,
@@ -121,14 +126,20 @@ export default function PhotosManager({ isOpen, onClose, galleryId }) {
         takenAt: photoData[idx].isoDate,
       }))
 
-      // ✅ Call GraphQL createPhotos
+      // ✅ Send GraphQL mutation
       await createPhotosMutation({
         variables: { data: gqlPayload },
       })
 
       console.log("✅ Photos created!")
       setPhotoData([])
-      onClose()
+
+      // ✅ Refresh photos in parent page
+      if (typeof onUploadComplete === "function") {
+        await onUploadComplete()
+      } else {
+        onClose()
+      }
     } catch (err) {
       console.error("Multi-upload failed:", err)
       setErrors(["❌ Failed to upload photos. Try again."])

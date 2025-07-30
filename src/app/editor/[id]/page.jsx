@@ -24,6 +24,7 @@ import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import iconImage from "./../../assets/icons/image.svg"
 import Toast from "./../../components/Toast"
 import PhotosManager from "./../../components/PhotosManager"
+import SortablePhoto from "./../../components/SortablePhoto"
 import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
 
@@ -84,7 +85,7 @@ export default function UpdateGalleryPage() {
   const params = useParams()
   const galleryId = params.id
 
-  const { data, loading, error } = useQuery(GET_GALLERY, {
+  const { data, loading, error, refetch } = useQuery(GET_GALLERY, {
     variables: { id: galleryId },
     fetchPolicy: "no-cache",
   })
@@ -403,36 +404,11 @@ export default function UpdateGalleryPage() {
         isOpen={isPhotoManagerOpen}
         onClose={() => setPhotoManagerOpen(false)}
         galleryId={galleryId}
+        onUploadComplete={async () => {
+          await refetch()
+          setPhotoManagerOpen(false)
+        }}
       />
     </main>
-  )
-}
-
-/** ✅ SortablePhoto Component */
-function SortablePhoto({ photo }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: photo.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    cursor: "grab",
-  }
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-      className="relative aspect-[3/4] bg-gray-100 rounded overflow-hidden shadow hover:shadow-lg transition-all"
-    >
-      <Image
-        src={photo.imageUrl}
-        alt={photo.caption || "Photo"}
-        fill
-        className="object-cover"
-      />
-    </div>
   )
 }
