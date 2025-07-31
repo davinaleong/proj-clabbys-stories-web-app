@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/sortable"
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
+import { passphraseGenerator } from "./../../utils/passphrase-generator"
 import { env } from "../../lib/env"
 import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
@@ -104,7 +105,6 @@ export default function UpdateGalleryPage() {
   const [isoDateValue, setIsoDateValue] = useState(null) // store ISO for saving
 
   const [actualPassphrase, setActualPassphrase] = useState("Set a passphrase")
-  const maskedPassphrase = actualPassphrase.replace(/./g, "*")
 
   const [editedStatus, setEditedStatus] = useState("DRAFT")
   const [isStatusOpen, setStatusOpen] = useState(false)
@@ -125,6 +125,8 @@ export default function UpdateGalleryPage() {
 
   const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
 
+  const passphraseFieldRef = useRef(null)
+
   useEffect(() => {
     if (data?.gallery) {
       const g = data.gallery
@@ -141,7 +143,12 @@ export default function UpdateGalleryPage() {
         setEditedDate(formatDate(parsedDate.toISOString(), "EEEE_D_MMM_YYYY"))
       }
 
-      setEditedStatus(g.status || "DRAFT")
+      const defaultStatus = statusOptions
+        .map((opt) => opt.name)
+        .includes(g.status)
+        ? g.status
+        : statusOptions[0]?.name || "DRAFT"
+      setEditedStatus(defaultStatus)
 
       setActualPassphrase("")
       setPhotos(g.photos || [])
@@ -215,6 +222,7 @@ export default function UpdateGalleryPage() {
       if (actualPassphrase && actualPassphrase !== env.DEFAULT_PASSPHRASE) {
         updateData.passphrase = actualPassphrase
       }
+      console.log("Actual passphrase:", actualPassphrase)
 
       // ✅ Save gallery details
       await updateGalleryMutation({
@@ -348,12 +356,13 @@ export default function UpdateGalleryPage() {
 
         {editedStatus === "PRIVATE" && (
           <p
+            ref={passphraseFieldRef}
+            className="text-gray-800 outline-none"
             contentEditable
             suppressContentEditableWarning
             onBlur={(e) =>
-              setActualPassphrase(e.currentTarget.textContent || "")
+              setActualPassphrase(e.currentTarget.textContent?.trim() || "")
             }
-            className="text-gray-800 outline-none cursor-pointer"
           >
             {actualPassphrase}
           </p>
@@ -374,7 +383,27 @@ export default function UpdateGalleryPage() {
             options={statusOptions}
             currentStatus={editedStatus}
             onClose={() => setStatusOpen(false)}
-            onSelect={(val) => setEditedStatus(val)}
+            onSelect={(selected) => {
+              const selectedStatus = statusOptions.find(
+                (opt) => opt.name === selected
+              )?.name
+              if (!selectedStatus) return // optional: guard clause for invalid value
+
+              setEditedStatus(selectedStatus)
+
+              if (selectedStatus === "PRIVATE") {
+                const newPass = passphraseGenerator
+                setActualPassphrase(newPass)
+
+                setTimeout(() => {
+                  if (passphraseFieldRef.current) {
+                    passphraseFieldRef.current.textContent = newPass
+                  }
+                }, 0)
+              } else {
+                setActualPassphrase("")
+              }
+            }}
           />
         </div>
       </section>
