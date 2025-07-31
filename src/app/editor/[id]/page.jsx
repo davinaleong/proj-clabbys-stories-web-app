@@ -17,7 +17,6 @@ import {
 } from "@dnd-kit/sortable"
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
-import { passphraseGenerator } from "./../../utils/passphrase-generator"
 import { env } from "../../lib/env"
 import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
@@ -66,6 +65,7 @@ const UPDATE_GALLERY = gql`
       id
       title
       description
+      passphrase
       date
       status
     }
@@ -104,7 +104,9 @@ export default function UpdateGalleryPage() {
   const [editedDate, setEditedDate] = useState("No date is set")
   const [isoDateValue, setIsoDateValue] = useState(null) // store ISO for saving
 
-  const [actualPassphrase, setActualPassphrase] = useState("Set a passphrase")
+  const [actualPassphrase, setEditedActualPassphrase] = useState(
+    env.DEFAULT_PASSPHRASE
+  )
 
   const [editedStatus, setEditedStatus] = useState("DRAFT")
   const [isStatusOpen, setStatusOpen] = useState(false)
@@ -126,6 +128,8 @@ export default function UpdateGalleryPage() {
   const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
 
   const passphraseFieldRef = useRef(null)
+
+  console.log(actualPassphrase) // TODO: Blank
 
   useEffect(() => {
     if (data?.gallery) {
@@ -151,16 +155,21 @@ export default function UpdateGalleryPage() {
       setEditedStatus(defaultStatus)
 
       if (g.status === "PRIVATE") {
-        setActualPassphrase(g.passphrase || env.DEFAULT_PASSPHRASE)
-      } else {
-        setActualPassphrase("")
-      }
+        const fallbackPass =
+          g.passphrase || env.DEFAULT_PASSPHRASE || passphraseGenerator
 
-      console.log("Loaded gallery:", g)
+        setEditedActualPassphrase(fallbackPass)
+
+        setTimeout(() => {
+          if (passphraseFieldRef.current) {
+            passphraseFieldRef.current.textContent = fallbackPass
+          }
+        }, 0)
+      }
 
       setPhotos(g.photos || [])
     }
-  }, [data])
+  }, [data, statusOptions])
 
   // ✅ Drag and drop sensors
   const sensors = useSensors(
@@ -225,11 +234,6 @@ export default function UpdateGalleryPage() {
         date: isoDate,
         status: editedStatus,
       }
-
-      if (actualPassphrase && actualPassphrase !== env.DEFAULT_PASSPHRASE) {
-        updateData.passphrase = actualPassphrase
-      }
-      console.log("Actual passphrase:", actualPassphrase)
 
       // ✅ Save gallery details
       await updateGalleryMutation({
@@ -362,17 +366,19 @@ export default function UpdateGalleryPage() {
         </div>
 
         {editedStatus === "PRIVATE" && (
-          <p
-            ref={passphraseFieldRef}
-            className="text-gray-800 outline-none"
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) =>
-              setActualPassphrase(e.currentTarget.textContent?.trim() || "")
-            }
-          >
-            {actualPassphrase}
-          </p>
+          <div className="relative">
+            <p
+              ref={passphraseFieldRef}
+              className="text-gray-800 outline-none cursor-pointer"
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) =>
+                setEditedActualPassphrase(e.currentTarget.textContent.trim())
+              }
+            >
+              {actualPassphrase || env.DEFAULT_PASSPHRASE}
+            </p>
+          </div>
         )}
 
         {/* ✅ Status Picker */}
@@ -400,7 +406,7 @@ export default function UpdateGalleryPage() {
 
               if (selectedStatus === "PRIVATE") {
                 const newPass = passphraseGenerator
-                setActualPassphrase(newPass)
+                setEditedActualPassphrase(newPass)
 
                 setTimeout(() => {
                   if (passphraseFieldRef.current) {
@@ -408,7 +414,7 @@ export default function UpdateGalleryPage() {
                   }
                 }, 0)
               } else {
-                setActualPassphrase("")
+                setEditedActualPassphrase("")
               }
             }}
           />
