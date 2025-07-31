@@ -150,7 +150,14 @@ export default function UpdateGalleryPage() {
         : statusOptions[0]?.name || "DRAFT"
       setEditedStatus(defaultStatus)
 
-      setActualPassphrase("")
+      if (g.status === "PRIVATE") {
+        setActualPassphrase(g.passphrase || env.DEFAULT_PASSPHRASE)
+      } else {
+        setActualPassphrase("")
+      }
+
+      console.log("Loaded gallery:", g)
+
       setPhotos(g.photos || [])
     }
   }, [data])
