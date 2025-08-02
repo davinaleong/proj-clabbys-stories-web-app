@@ -48,7 +48,7 @@ export default function StatusPicker({
           <button
             key={key}
             onClick={() => {
-              onSelect(key) // returns the status key (DRAFT, PRIVATE, PUBLISHED)
+              onSelect(key) // returns the status key (DRAFT, PUBLISHED, PUBLIC)
               onClose()
             }}
             className={`w-full text-left px-3 py-2 rounded-sm text-sm ${

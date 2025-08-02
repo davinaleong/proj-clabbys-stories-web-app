@@ -33,21 +33,25 @@ export default function FaqPage() {
       a: "You can create and manage galleries, upload photos, reorder them via drag-and-drop, change app settings (name, sort order, lightbox mode, date format), and export your data as an Excel file.",
     },
     {
-      q: "What is the difference between Draft, Private, and Published galleries?",
+      q: "What is the difference between Draft, Published, and Public galleries?",
       a: (
         <ul className="list-disc pl-5 space-y-1">
           <li>
-            <b>Draft:</b> Only visible in the Editor, not published anywhere.
+            <b>Draft:</b> Only visible to you in the Editor. Not shared or
+            accessible to anyone else.
           </li>
           <li>
-            <b>Private:</b> Accessible only with a secret link/passphrase.
+            <b>Published:</b> Accessible only via a secret passphrase. Use this
+            when you want to share with selected people.
           </li>
           <li>
-            <b>Published:</b> Publicly accessible to viewers.
+            <b>Public:</b> Viewable by anyone with the gallery link. No
+            passphrase required.
           </li>
         </ul>
       ),
     },
+
     {
       q: "How do I upload photos?",
       a: "Open a gallery, click Upload Photos, select multiple images from your device, and they’ll automatically upload to Cloudinary.",

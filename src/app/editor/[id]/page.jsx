@@ -129,8 +129,6 @@ export default function UpdateGalleryPage() {
 
   const passphraseFieldRef = useRef(null)
 
-  console.log(actualPassphrase) // TODO: Blank
-
   useEffect(() => {
     if (data?.gallery) {
       const g = data.gallery
@@ -154,7 +152,7 @@ export default function UpdateGalleryPage() {
         : statusOptions[0]?.name || "DRAFT"
       setEditedStatus(defaultStatus)
 
-      if (g.status === "PRIVATE") {
+      if (g.status === "PUBLISHED") {
         const fallbackPass =
           g.passphrase || env.DEFAULT_PASSPHRASE || passphraseGenerator
 
@@ -234,6 +232,8 @@ export default function UpdateGalleryPage() {
         date: isoDate,
         status: editedStatus,
       }
+
+      console.log("Saving gallery with data:", updateData)
 
       // ✅ Save gallery details
       await updateGalleryMutation({
@@ -365,7 +365,7 @@ export default function UpdateGalleryPage() {
           />
         </div>
 
-        {editedStatus === "PRIVATE" && (
+        {editedStatus === "PUBLISHED" && (
           <div className="relative">
             <p
               ref={passphraseFieldRef}
@@ -404,7 +404,7 @@ export default function UpdateGalleryPage() {
 
               setEditedStatus(selectedStatus)
 
-              if (selectedStatus === "PRIVATE") {
+              if (selectedStatus === "PUBLISHED") {
                 const newPass = passphraseGenerator
                 setEditedActualPassphrase(newPass)
 

@@ -139,19 +139,6 @@ export default function SinglePhotoUploader({ galleryId }) {
               className="w-full border rounded px-3 py-2"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium">Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="DRAFT">Draft</option>
-              <option value="PRIVATE">Private</option>
-              <option value="PUBLISHED">Published</option>
-            </select>
-          </div>
         </div>
       )}
 

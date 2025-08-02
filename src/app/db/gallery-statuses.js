@@ -1,7 +1,7 @@
 const STATUSES = {
   DRAFT: "Draft",
-  PRIVATE: "Private",
   PUBLISHED: "Published",
+  PUBLIC: "Public",
 }
 
 export default STATUSES
