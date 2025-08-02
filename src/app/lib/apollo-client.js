@@ -1,22 +1,26 @@
-// lib/apollo-client.js
 "use client"
 
-import { ApolloClient, InMemoryCache } from "@apollo/client"
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client"
 import { env } from "./env"
 
-export const client = new ApolloClient({
+const httpLink = new HttpLink({
   uri: env.GQL_API_URL || "http://localhost:4000/graphql",
+  credentials: "include", // 🚨 This is key for sending cookies
+})
+
+export const client = new ApolloClient({
+  link: httpLink,
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
         fields: {
           galleries: {
-            merge: false, // don’t merge arrays incorrectly
+            merge: false,
           },
         },
       },
       Gallery: {
-        keyFields: ["id"], // Apollo caches by id
+        keyFields: ["id"],
       },
       Photo: {
         keyFields: ["id"],
