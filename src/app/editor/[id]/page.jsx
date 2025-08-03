@@ -136,6 +136,7 @@ export default function UpdateGalleryPage() {
 
   // ✅ New: saving state for Save button
   const [saving, setSaving] = useState(false)
+  const [archiving, setArchiving] = useState(false) // TODO: Use this for archive button
 
   const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
 
@@ -269,6 +270,8 @@ export default function UpdateGalleryPage() {
   }
 
   const handleArchive = async () => {
+    setArchiving(true)
+
     try {
       await archiveGalleryMutation({ variables: { id: galleryId } })
 
@@ -330,11 +333,35 @@ export default function UpdateGalleryPage() {
            */}
           <button
             onClick={handleArchive}
-            disabled={saving}
-            className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-amber-500 hover:bg-amber-700 text-white"
+            disabled={archiving}
+            className={`flex gap-2 items-center px-4 py-2 rounded-md  text-white transition ${
+              archiving
+                ? "bg-amber-500 opacity-80 cursor-not-allowed"
+                : "bg-amber-500 hover:bg-amber-700"
+            }`}
           >
-            <Image src={iconArchive} alt="Image Icon" width={16} height={16} />
-            Archive
+            {archiving ? (
+              <>
+                <Image
+                  src={iconLoaderWhite}
+                  alt="Archiving..."
+                  width={18}
+                  height={18}
+                  className="animate-spin"
+                />
+                Archiving&hellip;
+              </>
+            ) : (
+              <>
+                <Image
+                  src={iconArchive}
+                  alt="Archive Icon"
+                  width={16}
+                  height={16}
+                />
+                Archive
+              </>
+            )}
           </button>
           <button
             onClick={handleSave}
