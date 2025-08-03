@@ -21,6 +21,7 @@ import { env } from "../../lib/env"
 import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import iconImage from "./../../assets/icons/image.svg"
+import iconArchive from "./../../assets/icons/archive.svg"
 import Toast from "./../../components/Toast"
 import PhotosManager from "./../../components/PhotosManager"
 import SortablePhoto from "./../../components/SortablePhoto"
@@ -81,6 +82,15 @@ const UPDATE_PHOTO_ORDER = gql`
   }
 `
 
+const ARCHIVE_GALLERY = gql`
+  mutation ArchiveGallery($id: ID!) {
+    archiveGallery(id: $id) {
+      id
+      deletedAt
+    }
+  }
+`
+
 export default function UpdateGalleryPage() {
   const params = useParams()
   const galleryId = params.id
@@ -94,6 +104,8 @@ export default function UpdateGalleryPage() {
   const statusOptions = enumData?.__type?.enumValues || []
 
   const [updateGalleryMutation] = useMutation(UPDATE_GALLERY)
+  const [archiveGalleryMutation] = useMutation(ARCHIVE_GALLERY)
+
   const [updatePhotoOrderMutation] = useMutation(UPDATE_PHOTO_ORDER)
 
   // ✅ Editable states
@@ -256,6 +268,24 @@ export default function UpdateGalleryPage() {
     }
   }
 
+  const handleArchive = async () => {
+    try {
+      await archiveGalleryMutation({ variables: { id: galleryId } })
+
+      setToastType("success")
+      setToastMessage("✅ Gallery archived successfully!")
+
+      // Optional: redirect after archive
+      setTimeout(() => {
+        window.location.href = "/" // or use a router push
+      }, 1200)
+    } catch (err) {
+      console.error("Archive failed:", err)
+      setToastType("error")
+      setToastMessage("❌ Failed to archive gallery.")
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex justify-center items-center h-screen">
@@ -287,6 +317,26 @@ export default function UpdateGalleryPage() {
 
         <div className="flex gap-2">
           <button
+            onClick={() => setPhotoManagerOpen(true)}
+            className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-700 text-white"
+          >
+            <Image src={iconImage} alt="Image Icon" width={16} height={16} />
+            Photos
+          </button>
+          {/* TODO: Archive Gallery Functionality:
+           * 1. Call the archive mutation
+           * 2. Show confirmation toast
+           * 3. Redirect to gallery list or home page
+           */}
+          <button
+            onClick={handleArchive}
+            disabled={saving}
+            className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-amber-500 hover:bg-amber-700 text-white"
+          >
+            <Image src={iconArchive} alt="Image Icon" width={16} height={16} />
+            Archive
+          </button>
+          <button
             onClick={handleSave}
             disabled={saving}
             className={`flex gap-2 items-center px-4 py-2 rounded-md  text-white transition ${
@@ -317,13 +367,6 @@ export default function UpdateGalleryPage() {
                 Save
               </>
             )}
-          </button>
-          <button
-            onClick={() => setPhotoManagerOpen(true)}
-            className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-700 text-white"
-          >
-            <Image src={iconImage} alt="Image Icon" width={16} height={16} />
-            Manage Photos
           </button>
         </div>
       </header>
