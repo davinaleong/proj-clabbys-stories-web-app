@@ -233,8 +233,6 @@ export default function UpdateGalleryPage() {
         status: editedStatus,
       }
 
-      console.log("Saving gallery with data:", updateData)
-
       // ✅ Save gallery details
       await updateGalleryMutation({
         variables: { id: galleryId, data: updateData },
