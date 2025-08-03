@@ -10,6 +10,7 @@ import { env } from "../lib/env"
 import whiteLogo from "./../assets/logos/logo-white.png"
 import circleQuestionMarkIcon from "./../assets/icons/circle-question-mark.svg"
 import grid2x2Icon from "./../assets/icons/grid-2x2.svg"
+import archiveIcon from "./../assets/icons/archive-w.svg"
 import settingsIcon from "./../assets/icons/settings.svg"
 import menuIcon from "./../assets/icons/menu.svg"
 import xIcon from "./../assets/icons/x.svg"
@@ -78,6 +79,18 @@ export default function EditorLayout({ children }) {
             Galleries
           </Link>
           <Link
+            href="/editor/archived"
+            className="flex gap-2 items-center hover:underline"
+          >
+            <Image
+              src={archiveIcon}
+              alt="Archived Icon"
+              width={16}
+              height={16}
+            />
+            Archived
+          </Link>
+          <Link
             href="/editor/settings"
             className="flex gap-2 items-center hover:underline"
           >
@@ -126,6 +139,18 @@ export default function EditorLayout({ children }) {
           >
             <Image src={grid2x2Icon} alt="Grid Icon" width={16} height={16} />
             Galleries
+          </Link>
+          <Link
+            href="/editor/archived"
+            className="flex gap-2 items-center py-2 px-6 hover:bg-carbon-blue-700"
+          >
+            <Image
+              src={archiveIcon}
+              alt="Archived Icon"
+              width={16}
+              height={16}
+            />
+            Archived
           </Link>
           <Link
             href="/editor/settings"
