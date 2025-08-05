@@ -1,5 +1,5 @@
 "use client"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { gql, useQuery, useMutation } from "@apollo/client"
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
@@ -93,6 +93,8 @@ const ARCHIVE_GALLERY = gql`
 
 export default function UpdateGalleryPage() {
   const params = useParams()
+  const router = useRouter()
+
   const galleryId = params.id
 
   const { data, loading, error, refetch } = useQuery(GET_GALLERY, {
@@ -280,7 +282,7 @@ export default function UpdateGalleryPage() {
 
       // Optional: redirect after archive
       setTimeout(() => {
-        window.location.href = "/" // or use a router push
+        router.push("/editor/")
       }, 1200)
     } catch (err) {
       console.error("Archive failed:", err)

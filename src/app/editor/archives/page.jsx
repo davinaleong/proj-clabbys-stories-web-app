@@ -124,34 +124,6 @@ export default function HomePage() {
         <h1 className="font-serif text-3xl font-bold text-carbon-blue-700">
           Archives
         </h1>
-
-        <button
-          onClick={handleCreateClick}
-          disabled={creating}
-          className={`flex gap-2 items-center text-white px-4 py-2 rounded-md transition ${
-            creating
-              ? "bg-carbon-blue-500 opacity-80 cursor-not-allowed"
-              : "bg-carbon-blue-700 hover:bg-carbon-blue-800"
-          }`}
-        >
-          {creating ? (
-            <>
-              <Image
-                src={iconLoaderWhite}
-                alt="Loading..."
-                width={18}
-                height={18}
-                className="animate-spin"
-              />
-              Creating...
-            </>
-          ) : (
-            <>
-              <Image src={plusIcon} alt="Plus Icon" width={16} height={16} />
-              Create
-            </>
-          )}
-        </button>
       </header>
 
       {/* ✅ archives Grid */}
@@ -184,7 +156,7 @@ export default function HomePage() {
               status={archive.status}
               date={formattedDate}
               description={archive.description || "No description provided."}
-              href={`/editor/${archive.id}`}
+              href={`/editor/archives/${archive.id}`}
             />
           )
         })}
