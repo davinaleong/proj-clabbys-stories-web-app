@@ -7,6 +7,7 @@ import { env } from "./../../../lib/env"
 import { formatDate } from "./../../../utils/format-date"
 import iconRotate from "./../../../assets/icons/rotate-ccw-w.svg"
 import iconTrash from "./../../../assets/icons/trash-2-w.svg"
+import iconBan from "./../../../assets/icons/ban.svg"
 import Toast from "./../../../components/Toast"
 import Thumbnail from "./../../../components/Thumbnail"
 
@@ -178,22 +179,31 @@ export default function UpdateArchivePage() {
 
       {isConfirmOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-            <p className="mb-4 text-red-600 font-bold">
-              Are you sure you want to permanently delete this archive?
-            </p>
-            <div className="flex justify-end gap-2">
+          <div
+            className={`bg-white p-6 rounded shadow-lg max-w-sm w-full flow transition-opacity duration-200 ${
+              deleting ? "opacity-50 pointer-events-none" : ""
+            }`}
+          >
+            <p>Are you sure you want to permanently delete this archive?</p>
+            <div className="flex gap-2 justify-end mt-4">
               <button
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="px-4 py-2 flex gap-2 bg-gray-300 rounded"
                 onClick={() => setConfirmOpen(false)}
               >
+                <Image src={iconBan} alt="Ban Icon" width={16} height={16} />
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-red-600 text-white rounded"
+                className="px-4 py-2 flex gap-2 bg-red-600 text-white rounded"
                 onClick={handleDelete}
                 disabled={deleting}
               >
+                <Image
+                  src={iconTrash}
+                  alt="Trash Icon"
+                  width={16}
+                  height={16}
+                />
                 {deleting ? "Deleting..." : "Delete"}
               </button>
             </div>
