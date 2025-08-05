@@ -79,7 +79,7 @@ export default function EditorLayout({ children }) {
             Galleries
           </Link>
           <Link
-            href="/editor/archived"
+            href="/editor/archives"
             className="flex gap-2 items-center hover:underline"
           >
             <Image
@@ -88,7 +88,7 @@ export default function EditorLayout({ children }) {
               width={16}
               height={16}
             />
-            Archived
+            Archives
           </Link>
           <Link
             href="/editor/settings"
@@ -141,7 +141,7 @@ export default function EditorLayout({ children }) {
             Galleries
           </Link>
           <Link
-            href="/editor/archived"
+            href="/editor/archives"
             className="flex gap-2 items-center py-2 px-6 hover:bg-carbon-blue-700"
           >
             <Image
@@ -150,7 +150,7 @@ export default function EditorLayout({ children }) {
               width={16}
               height={16}
             />
-            Archived
+            Archives
           </Link>
           <Link
             href="/editor/settings"
