@@ -46,7 +46,6 @@ export default function EditorLayout({ children }) {
   useEffect(() => {
     if (appSetting) {
       localStorage.setItem("appSettings", JSON.stringify(appSetting))
-      console.log("✅ App settings saved to localStorage:", appSetting)
     }
   }, [appSetting])
 
