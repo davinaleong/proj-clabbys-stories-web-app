@@ -15,7 +15,7 @@ const playfair = Playfair({
 
 export const metadata = {
   title: env.APP_NAME,
-  description: "An editor for Clabby's Stories",
+  description: "An editor for C&G's Stories",
 }
 
 export default function RootLayout({ children }) {
