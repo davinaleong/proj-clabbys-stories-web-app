@@ -1,13 +1,6 @@
 # Tasks
 
-1. Long-press on Gallery > Photo to open a Photo Menu
-2. Menu Options:
-   - Delete Photo from Gallery
-     - Clicked/Tapped > Delete Photo
-   - Move Photo to:
-     - (Vertical List of Galleries)
-       - Clicked/Tapped > Move Photo to Gallery
-3. Show Galleries by [id]:
+1. Show Galleries by [id]:
    - Data to show:
      - Gallery's metadata
      - Photos in a grid
