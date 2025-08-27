@@ -18,6 +18,7 @@ import {
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
 import { env } from "../../lib/env"
+import { passphraseGenerator } from "../../utils/passphrase-generator"
 import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import iconImage from "./../../assets/icons/image.svg"
@@ -27,6 +28,7 @@ import PhotosManager from "./../../components/PhotosManager"
 import SortablePhoto from "./../../components/SortablePhoto"
 import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
+import ContextMenu from "./../../components/ContextMenu"
 
 // ✅ Queries
 const GET_GALLERY = gql`
@@ -91,6 +93,32 @@ const ARCHIVE_GALLERY = gql`
   }
 `
 
+const GET_GALLERIES_MIN = gql`
+  query GetGalleriesMin {
+    galleries {
+      id
+      title
+    }
+  }
+`
+
+const MOVE_PHOTO = gql`
+  mutation MovePhoto($photoId: ID!, $toGalleryId: ID!) {
+    movePhotoToGallery(photoId: $photoId, toGalleryId: $toGalleryId) {
+      id
+      galleryId
+    }
+  }
+`
+
+const DELETE_PHOTO = gql`
+  mutation DeletePhoto($id: ID!) {
+    deletePhoto(id: $id) {
+      id
+    }
+  }
+`
+
 export default function UpdateGalleryPage() {
   const params = useParams()
   const router = useRouter()
@@ -143,6 +171,16 @@ export default function UpdateGalleryPage() {
   const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
 
   const passphraseFieldRef = useRef(null)
+
+  const { data: allGalsData } = useQuery(GET_GALLERIES_MIN, {
+    fetchPolicy: "cache-first",
+  })
+  const allGalleries = (allGalsData?.galleries ?? []).filter(
+    (g) => g.id !== galleryId
+  )
+
+  const [movePhotoMutation] = useMutation(MOVE_PHOTO)
+  const [deletePhotoMutation] = useMutation(DELETE_PHOTO)
 
   useEffect(() => {
     if (data?.gallery) {
@@ -288,6 +326,30 @@ export default function UpdateGalleryPage() {
       console.error("Archive failed:", err)
       setToastType("error")
       setToastMessage("❌ Failed to archive gallery.")
+    }
+  }
+
+  async function movePhoto(photoId, toGalleryId) {
+    try {
+      await movePhotoMutation({ variables: { photoId, toGalleryId } })
+      setToastType("success")
+      setToastMessage("✅ Photo moved.")
+      await refetch() // refresh current gallery’s photos
+    } catch (e) {
+      setToastType("error")
+      setToastMessage("❌ Failed to move photo.")
+    }
+  }
+
+  async function removePhoto(photoId) {
+    try {
+      await deletePhotoMutation({ variables: { id: photoId } })
+      setPhotos((ps) => ps.filter((p) => p.id !== photoId)) // optimistic UI
+      setToastType("success")
+      setToastMessage("🗑️ Photo removed.")
+    } catch (e) {
+      setToastType("error")
+      setToastMessage("❌ Failed to remove photo.")
     }
   }
 
@@ -507,7 +569,26 @@ export default function UpdateGalleryPage() {
             >
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {photos.map((photo) => (
-                  <SortablePhoto key={photo.id} photo={photo} />
+                  <ContextMenu
+                    key={photo.id}
+                    // Keep SortablePhoto as the *anchor* so drag-and-drop still works.
+                    anchor={<SortablePhoto photo={photo} />}
+                    items={[
+                      { id: "move-header", label: "Move to…", disabled: true },
+                      ...allGalleries.map((g) => ({
+                        id: `move-${g.id}`,
+                        label: g.title || "Untitled",
+                        onSelect: () => movePhoto(photo.id, g.id),
+                      })),
+                      "separator",
+                      {
+                        id: "remove",
+                        label: "Remove",
+                        danger: true,
+                        onSelect: () => removePhoto(photo.id),
+                      },
+                    ]}
+                  />
                 ))}
               </div>
             </SortableContext>
