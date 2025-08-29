@@ -12,3 +12,4 @@
        - Shows a password page
        - Visitor enters the password
        - Visitor can view the gallery
+2. Edit photo's metadata
