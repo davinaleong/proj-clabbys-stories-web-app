@@ -12,4 +12,6 @@
        - Shows a password page
        - Visitor enters the password
        - Visitor can view the gallery
+   - Progress: WIP
 2. Edit photo's metadata
+   - Progress: Not started
