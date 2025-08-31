@@ -160,13 +160,13 @@ function PinGate({ galleryId, onSuccess, appName }) {
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          className="w-full bg-[#F2F4F5] px-4 py-3 text-[#1C2440] placeholder:text-[#1C2440]/70 outline-none"
+          className="w-full bg-[#F2F4F5] rounded-sm px-4 py-3 text-[#1C2440] placeholder:text-[#1C2440]/70 outline-none"
         />
 
         <button
           onClick={submit}
           disabled={loading}
-          className="mt-4 w-full bg-black text-white py-3 font-semibold disabled:opacity-60"
+          className="mt-4 w-full bg-carbon-blue-500 hover:bg-carbon-blue-700 rounded-sm text-white py-3 font-semibold disabled:opacity-60"
         >
           {loading ? "Checking…" : "Enter"}
         </button>
