@@ -286,6 +286,13 @@ export default function UpdateGalleryPage() {
         status: editedStatus,
       }
 
+      if (editedStatus === "PUBLISHED") {
+        updateData.passphrase =
+          actualPassphrase.trim() || env.DEFAULT_PASSPHRASE.trim()
+      } else {
+        updateData.passphrase = null
+      }
+
       // ✅ Save gallery details
       await updateGalleryMutation({
         variables: { id: galleryId, data: updateData },

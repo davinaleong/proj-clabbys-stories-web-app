@@ -8,10 +8,16 @@
    - 2 types:
      - Public
        - Allow anyone with the password can view the photos
-     - Private
+     - Published
        - Shows a password page
        - Visitor enters the password
        - Visitor can view the gallery
    - Progress: WIP
 2. Edit photo's metadata
-   - Progress: Not started
+   - Right-click on photo
+   - Show combo menu
+   - Edit Metadata option
+   - Shows a popup
+   - Popup contains fields to edit the photo's metadata
+   - Click save on the popup to update the photo's metadata
+   - Progress: Not Started
