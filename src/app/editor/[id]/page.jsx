@@ -18,19 +18,25 @@ import {
 import dayjs from "dayjs"
 import { formatDate } from "../../utils/format-date"
 import { env } from "../../lib/env"
-import { passphraseGenerator } from "../../utils/passphrase-generator"
+import { passphraseGenerator } from "./../../utils/passphrase-generator"
 import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import iconImage from "./../../assets/icons/image.svg"
 import iconArchive from "./../../assets/icons/archive-w.svg"
+import iconBan from "./../../assets/icons/ban-w.svg"
+import iconWand from "./../../assets/icons/wand.svg"
+import iconLock from "./../../assets/icons/lock.svg"
 import Toast from "./../../components/Toast"
 import PhotosManager from "./../../components/PhotosManager"
 import SortablePhoto from "./../../components/SortablePhoto"
 import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
 import ContextMenu from "./../../components/ContextMenu"
+import PassphraseModal from "./../../components/PassphraseModal"
 
+// ==============================
 // ✅ Queries
+// ==============================
 const GET_GALLERY = gql`
   query GetGallery($id: ID!) {
     gallery(id: $id) {
@@ -61,14 +67,24 @@ const GET_GALLERY_STATUS_ENUM = gql`
   }
 `
 
+const GET_GALLERIES_MIN = gql`
+  query GetGalleriesMin {
+    galleries {
+      id
+      title
+    }
+  }
+`
+
+// ==============================
 // ✅ Mutations
+// ==============================
 const UPDATE_GALLERY = gql`
   mutation UpdateGallery($id: ID!, $data: UpdateGalleryInput!) {
     updateGallery(id: $id, data: $data) {
       id
       title
       description
-      passphrase
       date
       status
     }
@@ -93,15 +109,6 @@ const ARCHIVE_GALLERY = gql`
   }
 `
 
-const GET_GALLERIES_MIN = gql`
-  query GetGalleriesMin {
-    galleries {
-      id
-      title
-    }
-  }
-`
-
 const MOVE_PHOTO = gql`
   mutation MovePhoto($photoId: ID!, $toGalleryId: ID!) {
     movePhotoToGallery(photoId: $photoId, toGalleryId: $toGalleryId) {
@@ -122,8 +129,8 @@ const DELETE_PHOTO = gql`
 export default function UpdateGalleryPage() {
   const params = useParams()
   const router = useRouter()
-
-  const galleryId = params.id
+  const rawId = params?.id
+  const galleryId = Array.isArray(rawId) ? rawId[0] : rawId
 
   const { data, loading, error, refetch } = useQuery(GET_GALLERY, {
     variables: { id: galleryId },
@@ -133,45 +140,6 @@ export default function UpdateGalleryPage() {
   const { data: enumData } = useQuery(GET_GALLERY_STATUS_ENUM)
   const statusOptions = enumData?.__type?.enumValues || []
 
-  const [updateGalleryMutation] = useMutation(UPDATE_GALLERY)
-  const [archiveGalleryMutation] = useMutation(ARCHIVE_GALLERY)
-
-  const [updatePhotoOrderMutation] = useMutation(UPDATE_PHOTO_ORDER)
-
-  // ✅ Editable states
-  const [editedTitle, setEditedTitle] = useState("Untitled Gallery")
-  const [editedDescription, setEditedDescription] = useState(
-    "No description provided."
-  )
-  const [editedDate, setEditedDate] = useState("No date is set")
-  const [isoDateValue, setIsoDateValue] = useState(null) // store ISO for saving
-
-  const [actualPassphrase, setEditedActualPassphrase] = useState(
-    env.DEFAULT_PASSPHRASE
-  )
-
-  const [editedStatus, setEditedStatus] = useState("DRAFT")
-  const [isStatusOpen, setStatusOpen] = useState(false)
-  const statusFieldRef = useRef(null)
-
-  const [photos, setPhotos] = useState([])
-
-  // ✅ Toast state
-  const [toastMessage, setToastMessage] = useState("")
-  const [toastType, setToastType] = useState("success")
-
-  // ✅ Date Picker open/close
-  const [isPickerOpen, setPickerOpen] = useState(false)
-  const dateFieldRef = useRef(null)
-
-  // ✅ New: saving state for Save button
-  const [saving, setSaving] = useState(false)
-  const [archiving, setArchiving] = useState(false) // TODO: Use this for archive button
-
-  const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
-
-  const passphraseFieldRef = useRef(null)
-
   const { data: allGalsData } = useQuery(GET_GALLERIES_MIN, {
     fetchPolicy: "cache-first",
   })
@@ -179,8 +147,41 @@ export default function UpdateGalleryPage() {
     (g) => g.id !== galleryId
   )
 
+  const [updateGalleryMutation] = useMutation(UPDATE_GALLERY)
+  const [archiveGalleryMutation] = useMutation(ARCHIVE_GALLERY)
+  const [updatePhotoOrderMutation] = useMutation(UPDATE_PHOTO_ORDER)
   const [movePhotoMutation] = useMutation(MOVE_PHOTO)
   const [deletePhotoMutation] = useMutation(DELETE_PHOTO)
+
+  // ✅ Editable states
+  const [editedTitle, setEditedTitle] = useState("Untitled Gallery")
+  const [editedDescription, setEditedDescription] = useState(
+    "No description provided."
+  )
+  const [editedDate, setEditedDate] = useState("No date is set")
+  const [isoDateValue, setIsoDateValue] = useState(null)
+  const [editedStatus, setEditedStatus] = useState("DRAFT")
+
+  const statusFieldRef = useRef(null)
+  const dateFieldRef = useRef(null)
+
+  const [isStatusOpen, setStatusOpen] = useState(false)
+  const [isPickerOpen, setPickerOpen] = useState(false)
+
+  const [photos, setPhotos] = useState([])
+
+  // ✅ Toast state
+  const [toastMessage, setToastMessage] = useState("")
+  const [toastType, setToastType] = useState("success")
+
+  // ✅ Buttons state
+  const [saving, setSaving] = useState(false)
+  const [archiving, setArchiving] = useState(false)
+  const [isPhotoManagerOpen, setPhotoManagerOpen] = useState(false)
+
+  // 🆕 Passphrase modal state
+  const [isPassphraseOpen, setPassphraseOpen] = useState(false)
+  const [seedPassphrase, setSeedPassphrase] = useState("")
 
   useEffect(() => {
     if (data?.gallery) {
@@ -205,18 +206,8 @@ export default function UpdateGalleryPage() {
         : statusOptions[0]?.name || "DRAFT"
       setEditedStatus(defaultStatus)
 
-      if (g.status === "PUBLISHED") {
-        const fallbackPass =
-          g.passphrase || env.DEFAULT_PASSPHRASE || passphraseGenerator
-
-        setEditedActualPassphrase(fallbackPass)
-
-        setTimeout(() => {
-          if (passphraseFieldRef.current) {
-            passphraseFieldRef.current.textContent = fallbackPass
-          }
-        }, 0)
-      }
+      // Seed the modal with a reasonable default when opened
+      setSeedPassphrase(env.DEFAULT_PASSPHRASE || passphraseGenerator())
 
       setPhotos(g.photos || [])
     }
@@ -234,9 +225,6 @@ export default function UpdateGalleryPage() {
     if (isoDateValue && isNaN(new Date(isoDateValue))) {
       return "Please select a valid date."
     }
-    if (actualPassphrase && actualPassphrase.length < 4) {
-      return "Passphrase must be at least 4 characters."
-    }
     return ""
   }
 
@@ -247,9 +235,10 @@ export default function UpdateGalleryPage() {
     const oldIndex = photos.findIndex((p) => p.id === active.id)
     const newIndex = photos.findIndex((p) => p.id === over.id)
 
-    const newOrder = arrayMove(photos, oldIndex, newIndex).map(
-      (p, idx) => ({ ...p, position: idx }) // ✅ assign new positions
-    )
+    const newOrder = arrayMove(photos, oldIndex, newIndex).map((p, idx) => ({
+      ...p,
+      position: idx,
+    }))
     setPhotos(newOrder)
   }
 
@@ -261,10 +250,9 @@ export default function UpdateGalleryPage() {
       return
     }
 
-    setSaving(true) // ✅ start saving
-
+    setSaving(true)
     try {
-      // ✅ Convert date to ISO
+      // Convert date to ISO
       let isoDate = null
       if (editedDate && editedDate !== "No date is set") {
         const parsed = dayjs(editedDate, [
@@ -278,7 +266,7 @@ export default function UpdateGalleryPage() {
         }
       }
 
-      // ✅ Build mutation payload
+      // Build mutation payload — 🔒 passphrase REMOVED from here
       const updateData = {
         title: editedTitle,
         description: editedDescription,
@@ -286,19 +274,12 @@ export default function UpdateGalleryPage() {
         status: editedStatus,
       }
 
-      if (editedStatus === "PUBLISHED") {
-        updateData.passphrase =
-          actualPassphrase.trim() || env.DEFAULT_PASSPHRASE.trim()
-      } else {
-        updateData.passphrase = null
-      }
-
-      // ✅ Save gallery details
+      // Save gallery details
       await updateGalleryMutation({
         variables: { id: galleryId, data: updateData },
       })
 
-      // ✅ Save photo order
+      // Save photo order
       const updates = photos.map((p, index) => ({
         photoId: p.id,
         position: index,
@@ -306,26 +287,22 @@ export default function UpdateGalleryPage() {
       await updatePhotoOrderMutation({ variables: { updates } })
 
       setToastType("success")
-      setToastMessage("✅ Gallery details, passphrase & photo order saved!")
+      setToastMessage("✅ Gallery details & photo order saved!")
     } catch (err) {
       console.error("Save failed:", err)
       setToastType("error")
       setToastMessage("❌ Failed to save gallery. Try again.")
     } finally {
-      setSaving(false) // ✅ end saving
+      setSaving(false)
     }
   }
 
   const handleArchive = async () => {
     setArchiving(true)
-
     try {
       await archiveGalleryMutation({ variables: { id: galleryId } })
-
       setToastType("success")
       setToastMessage("✅ Gallery archived successfully!")
-
-      // Optional: redirect after archive
       setTimeout(() => {
         router.push("/editor/")
       }, 1200)
@@ -341,7 +318,7 @@ export default function UpdateGalleryPage() {
       await movePhotoMutation({ variables: { photoId, toGalleryId } })
       setToastType("success")
       setToastMessage("✅ Photo moved.")
-      await refetch() // refresh current gallery’s photos
+      await refetch()
     } catch (e) {
       setToastType("error")
       setToastMessage("❌ Failed to move photo.")
@@ -351,12 +328,39 @@ export default function UpdateGalleryPage() {
   async function removePhoto(photoId) {
     try {
       await deletePhotoMutation({ variables: { id: photoId } })
-      setPhotos((ps) => ps.filter((p) => p.id !== photoId)) // optimistic UI
+      setPhotos((ps) => ps.filter((p) => p.id !== photoId))
       setToastType("success")
       setToastMessage("🗑️ Photo removed.")
     } catch (e) {
       setToastType("error")
       setToastMessage("❌ Failed to remove photo.")
+    }
+  }
+
+  const openPassphraseModal = () => {
+    // Seed with default or generator every time it opens (optional)
+    setSeedPassphrase(env.DEFAULT_PASSPHRASE || passphraseGenerator())
+    setPassphraseOpen(true)
+  }
+
+  const savePassphrase = async (value) => {
+    if (typeof value !== "string" || value.trim().length < 4) {
+      setToastType("error")
+      setToastMessage("Passphrase must be at least 4 characters.")
+      return
+    }
+    try {
+      const pass = value.trim()
+      await setGalleryPassphraseMutation({
+        variables: { id: galleryId, passphrase: pass },
+      })
+      setPassphraseOpen(false)
+      setToastType("success")
+      setToastMessage("🔒 Passphrase saved.")
+    } catch (e) {
+      console.error(e)
+      setToastType("error")
+      setToastMessage("❌ Failed to set passphrase.")
     }
   }
 
@@ -378,7 +382,7 @@ export default function UpdateGalleryPage() {
 
   return (
     <main className="relative flex-1 w-full max-w-6xl mx-auto px-4 flow sm:px-6 py-8">
-      {/* ✅ Title + Save */}
+      {/* ✅ Title + Actions */}
       <header className="flex justify-between items-center">
         <h1
           className="font-serif text-3xl font-bold text-carbon-blue-700 outline-none"
@@ -397,11 +401,18 @@ export default function UpdateGalleryPage() {
             <Image src={iconImage} alt="Image Icon" width={16} height={16} />
             Photos
           </button>
-          {/* TODO: Archive Gallery Functionality:
-           * 1. Call the archive mutation
-           * 2. Show confirmation toast
-           * 3. Redirect to gallery list or home page
-           */}
+
+          {/* 🆕 Show only when PUBLISHED */}
+          {(true || editedStatus === "PUBLISHED") && (
+            <button
+              onClick={openPassphraseModal}
+              className="flex gap-2 items-center px-4 py-2 rounded-md transition bg-neutral-500 hover:bg-neutral-700 text-white"
+            >
+              <Image src={iconLock} alt="Lock Icon" width={16} height={16} />
+              Set Passphrase
+            </button>
+          )}
+
           <button
             onClick={handleArchive}
             disabled={archiving}
@@ -434,6 +445,7 @@ export default function UpdateGalleryPage() {
               </>
             )}
           </button>
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -482,7 +494,7 @@ export default function UpdateGalleryPage() {
         </p>
 
         {/* ✅ Clickable Date Field */}
-        <div className="relative">
+        <div className="relative mt-2">
           <p
             ref={dateFieldRef}
             className="text-gray-800 outline-none cursor-pointer"
@@ -504,24 +516,8 @@ export default function UpdateGalleryPage() {
           />
         </div>
 
-        {editedStatus === "PUBLISHED" && (
-          <div className="relative">
-            <p
-              ref={passphraseFieldRef}
-              className="text-gray-800 outline-none cursor-pointer"
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(e) =>
-                setEditedActualPassphrase(e.currentTarget.textContent.trim())
-              }
-            >
-              {actualPassphrase || env.DEFAULT_PASSPHRASE}
-            </p>
-          </div>
-        )}
-
         {/* ✅ Status Picker */}
-        <div className="relative">
+        <div className="relative mt-2">
           <p
             ref={statusFieldRef}
             className="text-gray-800 outline-none cursor-pointer"
@@ -539,22 +535,8 @@ export default function UpdateGalleryPage() {
               const selectedStatus = statusOptions.find(
                 (opt) => opt.name === selected
               )?.name
-              if (!selectedStatus) return // optional: guard clause for invalid value
-
+              if (!selectedStatus) return
               setEditedStatus(selectedStatus)
-
-              if (selectedStatus === "PUBLISHED") {
-                const newPass = passphraseGenerator
-                setEditedActualPassphrase(newPass)
-
-                setTimeout(() => {
-                  if (passphraseFieldRef.current) {
-                    passphraseFieldRef.current.textContent = newPass
-                  }
-                }, 0)
-              } else {
-                setEditedActualPassphrase("")
-              }
             }}
           />
         </div>
@@ -578,7 +560,6 @@ export default function UpdateGalleryPage() {
                 {photos.map((photo) => (
                   <ContextMenu
                     key={photo.id}
-                    // Keep SortablePhoto as the *anchor* so drag-and-drop still works.
                     anchor={<SortablePhoto photo={photo} />}
                     items={[
                       { id: "move-header", label: "Move to…", disabled: true },
@@ -620,6 +601,14 @@ export default function UpdateGalleryPage() {
           await refetch()
           setPhotoManagerOpen(false)
         }}
+      />
+
+      {/* 🆕 Passphrase Modal */}
+      <PassphraseModal
+        open={isPassphraseOpen}
+        onClose={() => setPassphraseOpen(false)}
+        onSave={savePassphrase}
+        initialValue={seedPassphrase}
       />
     </main>
   )
