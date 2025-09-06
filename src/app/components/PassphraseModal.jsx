@@ -12,9 +12,7 @@ import iconCheck from "../assets/icons/check.svg"
 // ✅ Dedicated mutation (same shape you had)
 const SET_GALLERY_PASSPHRASE = gql`
   mutation SetGalleryPassphrase($id: ID!, $passphrase: String!) {
-    setGalleryPassphrase(id: $id, passphrase: $passphrase) {
-      id
-    }
+    setGalleryPassphrase(id: $id, passphrase: $passphrase)
   }
 `
 
@@ -55,10 +53,11 @@ export default function PassphraseModal({
 
   const handleSave = async () => {
     const pass = (value || "").trim()
-    if (pass.length < 4) return // Keep UI validation in parent toast
+    if (pass.length < 8) return // Keep UI validation in parent toast
 
     try {
       setSaving(true)
+      console.log(galleryId, pass)
       await setGalleryPassphrase({
         variables: { id: galleryId, passphrase: pass },
       })

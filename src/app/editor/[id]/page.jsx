@@ -607,8 +607,13 @@ export default function UpdateGalleryPage() {
       <PassphraseModal
         open={isPassphraseOpen}
         onClose={() => setPassphraseOpen(false)}
-        onSave={savePassphrase}
-        initialValue={seedPassphrase}
+        galleryId={galleryId}
+        seed={seedPassphrase}
+        generatePassphrase={() => passphraseGenerator()}
+        onSaved={() => {
+          setToastType("success")
+          setToastMessage("🔒 Passphrase saved.")
+        }}
       />
     </main>
   )
