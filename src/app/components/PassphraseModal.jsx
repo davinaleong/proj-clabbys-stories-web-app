@@ -78,7 +78,7 @@ export default function PassphraseModal({
       />
 
       {/* card */}
-      <div className="relative z-10 w-[90%] max-w-md rounded-xl bg-pastel-pink-500 p-5 shadow-xl">
+      <div className="relative z-10 w-[90%] max-w-md rounded-sm bg-pastel-pink-500 p-5 shadow-xl">
         <h2 className="font-serif text-2xl font-bold text-carbon-blue-700 mb-3">
           Set Passphrase
         </h2>
@@ -86,7 +86,7 @@ export default function PassphraseModal({
         <div className="space-y-3">
           <input
             type="text"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-carbon-blue-400"
+            className="w-full rounded-sm bg-pastel-pink-700 px-3 py-2 outline-none focus:ring-2 focus:ring-carbon-blue-400"
             placeholder="Enter a passphrase"
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -95,7 +95,7 @@ export default function PassphraseModal({
           <div className="flex gap-2">
             <button
               type="button"
-              className="inline-flex gap-2 px-3 py-2 rounded-md bg-neutral-200 hover:bg-neutral-300"
+              className="inline-flex gap-2 px-3 py-2 rounded-sm bg-neutral-300 hover:bg-neutral-500"
               onClick={handleGenerate}
               title="Generate a random passphrase"
             >
@@ -107,7 +107,7 @@ export default function PassphraseModal({
 
             <button
               type="button"
-              className="inline-flex gap-2 px-4 py-2 rounded-md bg-neutral-500 text-white hover:bg-neutral-700"
+              className="inline-flex gap-2 px-4 py-2 rounded-sm bg-neutral-500 text-white hover:bg-neutral-700"
               onClick={onClose}
               disabled={saving}
             >
@@ -117,7 +117,7 @@ export default function PassphraseModal({
 
             <button
               type="button"
-              className="inline-flex gap-2 px-4 py-2 rounded-md bg-carbon-blue-500 text-white hover:bg-carbon-blue-700 disabled:opacity-60"
+              className="inline-flex gap-2 px-4 py-2 rounded-sm bg-carbon-blue-500 text-white hover:bg-carbon-blue-700 disabled:opacity-60"
               onClick={handleSave}
               disabled={saving || (value || "").trim().length < 4}
             >
