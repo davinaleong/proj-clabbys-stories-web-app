@@ -48,7 +48,8 @@ const GET_GALLERY = gql`
       photos {
         id
         imageUrl
-        caption
+        title
+        description
         takenAt
         position
       }
