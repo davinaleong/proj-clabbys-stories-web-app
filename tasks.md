@@ -1,5 +1,6 @@
 # Tasks
 
-1. Improvements:
-   - Populate the Photo Metadata Modal with the photo's current metadata
-   - Use the calendar component to set the photo's date
+1. Fix photo overlay
+   - Status: WIP
+2. Fix gallery layout
+   - Status: WIP
