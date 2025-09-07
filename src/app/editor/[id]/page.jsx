@@ -23,8 +23,6 @@ import iconCheck from "./../../assets/icons/check.svg"
 import iconLoaderWhite from "./../../assets/icons/loader-circle-w.svg"
 import iconImage from "./../../assets/icons/image.svg"
 import iconArchive from "./../../assets/icons/archive-w.svg"
-import iconBan from "./../../assets/icons/ban-w.svg"
-import iconWand from "./../../assets/icons/wand.svg"
 import iconLock from "./../../assets/icons/lock.svg"
 import Toast from "./../../components/Toast"
 import PhotosManager from "./../../components/PhotosManager"
@@ -33,6 +31,7 @@ import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
 import ContextMenu from "./../../components/ContextMenu"
 import PassphraseModal from "./../../components/PassphraseModal"
+import PhotoMetadataModal from "./../../components/PhotoMetadataModal"
 
 // ==============================
 // ✅ Queries
@@ -182,6 +181,9 @@ export default function UpdateGalleryPage() {
   // 🆕 Passphrase modal state
   const [isPassphraseOpen, setPassphraseOpen] = useState(false)
   const [seedPassphrase, setSeedPassphrase] = useState("")
+
+  const [selectedPhoto, setSelectedPhoto] = useState(null)
+  const [isMetadataOpen, setMetadataOpen] = useState(false)
 
   useEffect(() => {
     if (data?.gallery) {
@@ -362,6 +364,11 @@ export default function UpdateGalleryPage() {
       setToastType("error")
       setToastMessage("❌ Failed to set passphrase.")
     }
+  }
+
+  function openMetadata(photo) {
+    setSelectedPhoto(photo)
+    setMetadataOpen(true)
   }
 
   if (loading) {
@@ -562,6 +569,12 @@ export default function UpdateGalleryPage() {
                     key={photo.id}
                     anchor={<SortablePhoto photo={photo} />}
                     items={[
+                      {
+                        id: "edit-metadata",
+                        label: "Edit Metadata",
+                        onSelect: () => openMetadata(photo),
+                      },
+                      "separator",
                       { id: "move-header", label: "Move to…", disabled: true },
                       ...allGalleries.map((g) => ({
                         id: `move-${g.id}`,
@@ -614,6 +627,16 @@ export default function UpdateGalleryPage() {
           setToastType("success")
           setToastMessage("🔒 Passphrase saved.")
         }}
+      />
+
+      <PhotoMetadataModal
+        open={isMetadataOpen}
+        onClose={async (saved) => {
+          setMetadataOpen(false)
+          setSelectedPhoto(null)
+          if (saved) await refetch() // refresh photos
+        }}
+        photo={selectedPhoto}
       />
     </main>
   )

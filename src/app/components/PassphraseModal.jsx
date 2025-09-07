@@ -78,7 +78,7 @@ export default function PassphraseModal({
       />
 
       {/* card */}
-      <div className="relative z-10 w-[90%] max-w-md rounded-xl bg-white p-5 shadow-xl">
+      <div className="relative z-10 w-[90%] max-w-md rounded-xl bg-pastel-pink-500 p-5 shadow-xl">
         <h2 className="font-serif text-2xl font-bold text-carbon-blue-700 mb-3">
           Set Passphrase
         </h2>
