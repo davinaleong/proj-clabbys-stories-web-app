@@ -22,8 +22,8 @@ export default function GalleryView({ gallery, formatDateEnum, overlayMode }) {
   }, [gallery?.photos])
 
   return (
-    <div className="min-h-[100svh] bg-[#FAD7D7] px-4 py-8">
-      <div className="max-w-[420px] mx-auto">
+    <div className="min-h-[100svh] bg-pastel-pink-500 px-4 py-8">
+      <div className="mx-auto max-w-lg">
         <h1 className="text-3xl font-serif font-bold text-carbon-blue-500">
           {gallery?.title || "Our Special Moments"}
         </h1>
@@ -39,17 +39,17 @@ export default function GalleryView({ gallery, formatDateEnum, overlayMode }) {
             "A curated collection of photos and memories — capturing laughter, love, and the little things that matter most."}
         </p>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 flex flex-wrap gap-4">
           {photos.map((p) => (
             <button
               key={p.id}
-              className="relative aspect-square overflow-hidden"
+              className="relative max-w-[150px] rounded-sm shadow-lg aspect-square overflow-hidden"
               onClick={() => setActive(p)} // pass normalized photo w/ metadata
             >
               <img
                 src={p.imageUrl}
                 alt={p.description || p.title || ""}
-                className="h-full w-full object-cover"
+                className="block h-full w-full aspect-square object-cover"
               />
             </button>
           ))}
