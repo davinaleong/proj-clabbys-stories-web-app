@@ -491,15 +491,42 @@ export default function UpdateGalleryPage() {
 
       {/* ✅ Editable Fields */}
       <section>
+        {/* ✅ Gallery URL Field */}
+        <div className="relative mt-2">
+          <p
+            className="text-gray-800 outline-none"
+            contentEditable
+            suppressContentEditableWarning
+            onClick={async (e) => {
+              try {
+                const url = e.currentTarget.textContent
+                if (url) {
+                  await navigator.clipboard.writeText(url)
+                  setToastType("success")
+                  setToastMessage("📋 Gallery link copied to clipboard!")
+                }
+              } catch (err) {
+                console.error("Clipboard copy failed:", err)
+                setToastType("error")
+                setToastMessage("❌ Failed to copy link.")
+              }
+            }}
+          >
+            {`${env.WEB_URL}/galleries/${galleryId}`}
+          </p>
+        </div>
+
         {/* Description */}
-        <p
-          className="text-gray-800 outline-none"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => setEditedDescription(e.currentTarget.textContent)}
-        >
-          {editedDescription}
-        </p>
+        <div className="relative mt-2">
+          <p
+            className="text-gray-800 outline-none"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => setEditedDescription(e.currentTarget.textContent)}
+          >
+            {editedDescription}
+          </p>
+        </div>
 
         {/* ✅ Clickable Date Field */}
         <div className="relative mt-2">

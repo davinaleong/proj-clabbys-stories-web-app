@@ -1,5 +1,6 @@
 export const env = {
   APP_ENV: process.env.NEXT_PUBLIC_APP_ENV || "development",
+  WEB_URL: process.env.NEXT_PUBLIC_WEB_URL || "http://localhost:3000/",
   GQL_API_URL:
     process.env.NEXT_PUBLIC_GQL_API_URL || "http://localhost:4000/graphql",
   REST_API_URL:
