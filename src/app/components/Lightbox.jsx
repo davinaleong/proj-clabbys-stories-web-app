@@ -13,17 +13,14 @@ function parseDateish(dateish) {
 }
 
 export default function Lightbox({ photo, onClose, overlayMode }) {
+  console.log(photo) // null, TODO: Debug
   useEffect(() => {
     const onEsc = (e) => e.key === "Escape" && onClose?.()
     window.addEventListener("keydown", onEsc)
     return () => window.removeEventListener("keydown", onEsc)
   }, [onClose])
 
-  console.log("lightbox, A", photo) // <-- photo.title =  undefined
-
   if (!photo) return null
-
-  console.log("lightbox, B", photo) // <-- photo.title =  undefined
 
   const overlayClass =
     overlayMode === "BLURRED"
@@ -60,7 +57,7 @@ export default function Lightbox({ photo, onClose, overlayMode }) {
       </div>
 
       {hasMeta && (
-        <div className="absolute left-0 right-0 bottom-0 mx-4 mb-6 bg-white/95 rounded-sm p-4 max-w-[680px] shadow-lg">
+        <div className="absolute left-0 right-0 bottom-0 mx-4 mb-6 bg-white/70 rounded-sm p-4 max-w-[680px] shadow-lg">
           {title && (
             <h3 className="text-2xl font-bold font-serif text-carbon-blue-500 mb-1">
               {title}

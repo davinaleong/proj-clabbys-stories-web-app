@@ -5,8 +5,8 @@ import { formatByEnum } from "./../lib/format-by-enum"
 import Lightbox from "./../components/Lightbox"
 
 function normalizePhoto(p) {
-  const title = (p?.title ?? p?.caption ?? "").toString().trim()
-  const description = (p?.description ?? p?.caption ?? "").toString().trim()
+  const title = (p?.title ?? "").toString().trim()
+  const description = (p?.description ?? "").toString().trim()
   const takenAt = p?.takenAt ?? null // raw; Lightbox formats it
   return { ...p, title, description, takenAt }
 }

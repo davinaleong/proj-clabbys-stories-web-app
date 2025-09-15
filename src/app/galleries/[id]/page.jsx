@@ -22,8 +22,9 @@ const GET_GALLERY = gql`
       status
       photos {
         id
+        title
+        description
         imageUrl
-        caption
         takenAt
         position
       }
