@@ -4,5 +4,6 @@
    - Status: WIP
 2. Fix gallery layout
    - Status: WIP
-3. Update FAQ
-4. Documentation
+3. Get Gallery Link
+4. Update FAQ
+5. Documentation
