@@ -62,6 +62,10 @@ export default function GalleryView({ gallery, formatDateEnum, overlayMode }) {
         photo={active}
         onClose={() => setActive(null)}
         overlayMode={overlayMode}
+        photos={photos} // 🆕 pass whole array
+        slideshow={gallery?.lightboxMode === "SLIDESHOW"}
+        intervalMs={7000} // or make this configurable
+        formatDateEnum={formatDateEnum}
       />
     </div>
   )
