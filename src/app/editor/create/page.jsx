@@ -145,16 +145,24 @@ export default function CreateGalleryPage() {
 
       {/* ✅ Description */}
       <section className="mt-4">
-        <p
-          className="text-gray-800 outline-none"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => setDescription(e.currentTarget.textContent)}
-        >
-          {description}
-        </p>
+        <div className="text-gray-800  relative flex gap-2">
+          <p>
+            <strong>Description:</strong>
+          </p>
+          <p
+            className="outline-none"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => setDescription(e.currentTarget.textContent)}
+          >
+            {description}
+          </p>
+        </div>
 
-        <div className="relative inline-block">
+        <div className="relative flex gap-2">
+          <p>
+            <strong>Date:</strong>
+          </p>
           <p
             ref={dateFieldRef}
             className="text-gray-800 outline-none cursor-pointer"

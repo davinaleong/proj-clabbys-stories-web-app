@@ -517,9 +517,12 @@ export default function UpdateGalleryPage() {
       {/* ✅ Editable Fields */}
       <section>
         {/* ✅ Gallery URL Field */}
-        <div className="relative mt-2">
+        <div className="text-gray-800 relative flex gap-2 mt-2">
+          <p>
+            <strong>URL:</strong>
+          </p>
           <p
-            className="text-gray-800 outline-none"
+            className="outline-none"
             contentEditable
             suppressContentEditableWarning
             onClick={async (e) => {
@@ -542,7 +545,10 @@ export default function UpdateGalleryPage() {
         </div>
 
         {/* Description */}
-        <div className="relative mt-2">
+        <div className="text-gray-800 flex gap-2 relative mt-2">
+          <p>
+            <strong>Description:</strong>
+          </p>
           <p
             className="text-gray-800 outline-none"
             contentEditable
@@ -554,10 +560,13 @@ export default function UpdateGalleryPage() {
         </div>
 
         {/* ✅ Clickable Date Field */}
-        <div className="relative mt-2">
+        <div className="text-gray-800 flex gap-2 relative mt-2">
+          <p>
+            <strong>Date:</strong>
+          </p>
           <p
             ref={dateFieldRef}
-            className="text-gray-800 outline-none cursor-pointer"
+            className="outline-none cursor-pointer"
             onClick={() => setPickerOpen((prev) => !prev)}
           >
             {editedDate || "No date is set"}
@@ -577,10 +586,13 @@ export default function UpdateGalleryPage() {
         </div>
 
         {/* ✅ Status Picker */}
-        <div className="relative mt-2">
+        <div className="text-gray-800 flex gap-2 relative mt-2">
+          <p>
+            <strong>Status:</strong>
+          </p>
           <p
             ref={statusFieldRef}
-            className="text-gray-800 outline-none cursor-pointer"
+            className="outline-none cursor-pointer"
             onClick={() => setStatusOpen((prev) => !prev)}
           >
             {editedStatus}
@@ -602,10 +614,13 @@ export default function UpdateGalleryPage() {
         </div>
 
         {/* ✅ Lightbox Picker */}
-        <div className="relative mt-2">
+        <div className="text-gray-800 flex gap-2 relative mt-2">
+          <p>
+            <strong>Lightbox:</strong>
+          </p>
           <p
             ref={lightboxFieldRef}
-            className="text-gray-800 outline-none cursor-pointer"
+            className="outline-none cursor-pointer"
             onClick={() => setLightboxOpen((prev) => !prev)}
           >
             {editedLightbox}
