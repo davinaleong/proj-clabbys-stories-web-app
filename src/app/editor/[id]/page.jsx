@@ -29,6 +29,7 @@ import PhotosManager from "./../../components/PhotosManager"
 import SortablePhoto from "./../../components/SortablePhoto"
 import DatePicker from "./../../components/DatePicker"
 import StatusPicker from "./../../components/StatusPicker"
+import LightboxPicker from "./../../components/LightboxPicker"
 import ContextMenu from "./../../components/ContextMenu"
 import PassphraseModal from "./../../components/PassphraseModal"
 import PhotoMetadataModal from "./../../components/PhotoMetadataModal"
@@ -44,6 +45,7 @@ const GET_GALLERY = gql`
       description
       date
       status
+      lightboxMode
       createdAt
       photos {
         id
@@ -87,6 +89,7 @@ const UPDATE_GALLERY = gql`
       description
       date
       status
+      lightboxMode
     }
   }
 `
@@ -122,6 +125,16 @@ const DELETE_PHOTO = gql`
   mutation DeletePhoto($id: ID!) {
     deletePhoto(id: $id) {
       id
+    }
+  }
+`
+
+const GET_LIGHTBOX_ENUM = gql`
+  query GetLightboxEnum {
+    __type(name: "LightboxMode") {
+      enumValues {
+        name
+      }
     }
   }
 `
@@ -186,6 +199,13 @@ export default function UpdateGalleryPage() {
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [isMetadataOpen, setMetadataOpen] = useState(false)
 
+  const { data: lightboxEnumData } = useQuery(GET_LIGHTBOX_ENUM)
+  const lightboxOptions = lightboxEnumData?.__type?.enumValues || []
+
+  const [editedLightbox, setEditedLightbox] = useState("BLACK")
+  const lightboxFieldRef = useRef(null)
+  const [isLightboxOpen, setLightboxOpen] = useState(false)
+
   useEffect(() => {
     if (data?.gallery) {
       const g = data.gallery
@@ -208,6 +228,10 @@ export default function UpdateGalleryPage() {
         ? g.status
         : statusOptions[0]?.name || "DRAFT"
       setEditedStatus(defaultStatus)
+
+      if (g.lightboxMode) {
+        setEditedLightbox(g.lightboxMode)
+      }
 
       // Seed the modal with a reasonable default when opened
       setSeedPassphrase(env.DEFAULT_PASSPHRASE || passphraseGenerator())
@@ -275,6 +299,7 @@ export default function UpdateGalleryPage() {
         description: editedDescription,
         date: isoDate,
         status: editedStatus,
+        lightboxMode: editedLightbox,
       }
 
       // Save gallery details
@@ -573,6 +598,24 @@ export default function UpdateGalleryPage() {
               if (!selectedStatus) return
               setEditedStatus(selectedStatus)
             }}
+          />
+        </div>
+
+        {/* ✅ Lightbox Picker */}
+        <div className="relative mt-2">
+          <p
+            ref={lightboxFieldRef}
+            className="text-gray-800 outline-none cursor-pointer"
+            onClick={() => setLightboxOpen((prev) => !prev)}
+          >
+            {editedLightbox}
+          </p>
+          <LightboxPicker
+            anchorRef={lightboxFieldRef}
+            isOpen={isLightboxOpen}
+            currentMode={editedLightbox}
+            onClose={() => setLightboxOpen(false)}
+            onSelect={(selected) => setEditedLightbox(selected)}
           />
         </div>
       </section>
