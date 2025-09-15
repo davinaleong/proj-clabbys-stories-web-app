@@ -14,7 +14,6 @@ const GET_APP_SETTINGS = gql`
     appSettings {
       id
       applicationName
-      lightboxMode
       defaultSortOrder
       defaultDateFormat
     }
@@ -23,11 +22,6 @@ const GET_APP_SETTINGS = gql`
 
 const GET_SETTING_ENUMS = gql`
   query GetSettingEnums {
-    lightbox: __type(name: "LightboxMode") {
-      enumValues {
-        name
-      }
-    }
     sortOrder: __type(name: "SortOrder") {
       enumValues {
         name
@@ -46,14 +40,12 @@ const UPDATE_APP_SETTING = gql`
     updateAppSetting(id: $id, data: $data) {
       id
       applicationName
-      lightboxMode
       defaultSortOrder
       defaultDateFormat
     }
   }
 `
 
-// ✅ Logout mutation
 const LOGOUT_USER = gql`
   mutation LogoutUser {
     logoutUser {
@@ -81,12 +73,10 @@ export default function SettingsPage() {
 
   const [settingId, setSettingId] = useState("")
   const [appName, setAppName] = useState("App Name")
-  const [lightboxMode, setLightboxMode] = useState("BLACK")
   const [sortOrder, setSortOrder] = useState("ALPHABETICAL")
   const [dateFormat, setDateFormat] = useState("EEE_DD_MMM_YYYY")
   const [openPicker, setOpenPicker] = useState(null)
 
-  const lightboxOptions = enumData?.lightbox?.enumValues || []
   const sortOrderOptions = enumData?.sortOrder?.enumValues || []
   const dateFormatOptions = enumData?.dateFormat?.enumValues || []
 
@@ -98,7 +88,6 @@ export default function SettingsPage() {
         const parsed = JSON.parse(stored)
         if (parsed.id) setSettingId(parsed.id)
         if (parsed.applicationName) setAppName(parsed.applicationName)
-        if (parsed.lightboxMode) setLightboxMode(parsed.lightboxMode)
         if (parsed.defaultSortOrder) setSortOrder(parsed.defaultSortOrder)
         if (parsed.defaultDateFormat) setDateFormat(parsed.defaultDateFormat)
       } catch (err) {
@@ -113,7 +102,6 @@ export default function SettingsPage() {
     if (setting) {
       setSettingId(setting.id)
       setAppName(setting.applicationName)
-      setLightboxMode(setting.lightboxMode)
       setSortOrder(setting.defaultSortOrder)
       setDateFormat(setting.defaultDateFormat)
     }
@@ -129,7 +117,6 @@ export default function SettingsPage() {
           id: settingId,
           data: {
             applicationName: appName.trim(),
-            lightboxMode,
             defaultSortOrder: sortOrder,
             defaultDateFormat: dateFormat,
           },
@@ -159,15 +146,12 @@ export default function SettingsPage() {
     try {
       const { data } = await logoutUserMutation()
       if (data?.logoutUser?.success) {
-        // ✅ Clear all auth-related localStorage/session
         localStorage.removeItem("appSettings")
         localStorage.removeItem("authToken")
 
-        // Optionally show a message before redirect
         setToastType("success")
         setToastMessage("✅ Logged out successfully")
 
-        // Redirect after a short delay
         setTimeout(() => {
           router.push("/")
         }, 500)
@@ -187,21 +171,18 @@ export default function SettingsPage() {
     try {
       const res = await fetch(`${env.REST_API_URL}export`, {
         method: "GET",
-        credentials: "include", // if you need cookies/session
+        credentials: "include",
       })
 
       if (!res.ok) throw new Error("Export failed")
 
-      // Get the filename from response header
       const disposition = res.headers.get("Content-Disposition")
       let filename = "export.xlsx"
       if (disposition) {
-        // Try filename*=UTF-8''<name>
         const utf8Match = disposition.match(/filename\*\=UTF-8''([^;]+)/)
         if (utf8Match?.[1]) {
           filename = decodeURIComponent(utf8Match[1])
         } else {
-          // Fallback to plain filename="<name>"
           const simpleMatch = disposition.match(/filename="(.+?)"/)
           if (simpleMatch?.[1]) {
             filename = simpleMatch[1]
@@ -209,11 +190,9 @@ export default function SettingsPage() {
         }
       }
 
-      // Convert response to Blob
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
 
-      // Create a temp <a> link to trigger download
       const link = document.createElement("a")
       link.href = url
       link.download = filename
@@ -244,7 +223,6 @@ export default function SettingsPage() {
 
   return (
     <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-8">
-      {/* ✅ Toast */}
       <Toast
         className="mt-0"
         message={toastMessage}
@@ -252,7 +230,6 @@ export default function SettingsPage() {
         onClose={() => setToastMessage("")}
       />
 
-      {/* ✅ Heading + Save button on same row */}
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-serif font-bold text-carbon-blue-900">
           Settings
@@ -287,7 +264,6 @@ export default function SettingsPage() {
         </button>
       </header>
 
-      {/* ✅ Two-column grid */}
       <section className="grid grid-cols-2 gap-y-6 text-carbon-blue-900">
         {/* App Name */}
         <div className="font-medium">App Name</div>
@@ -298,27 +274,6 @@ export default function SettingsPage() {
           onBlur={(e) => setAppName(e.currentTarget.textContent)}
         >
           {appName}
-        </div>
-
-        {/* Lightbox Mode */}
-        <div className="font-medium">Lightbox Mode</div>
-        <div
-          className="cursor-pointer"
-          onClick={() =>
-            setOpenPicker(openPicker === "lightbox" ? null : "lightbox")
-          }
-        >
-          {lightboxMode}
-          {openPicker === "lightbox" && (
-            <EnumPicker
-              options={lightboxOptions}
-              current={lightboxMode}
-              onSelect={(val) => {
-                setLightboxMode(val)
-                setOpenPicker(null)
-              }}
-            />
-          )}
         </div>
 
         {/* Default Sort Order */}
@@ -336,6 +291,27 @@ export default function SettingsPage() {
               current={sortOrder}
               onSelect={(val) => {
                 setSortOrder(val)
+                setOpenPicker(null)
+              }}
+            />
+          )}
+        </div>
+
+        {/* Default Date Format */}
+        <div className="font-medium">Default Date Format</div>
+        <div
+          className="cursor-pointer"
+          onClick={() =>
+            setOpenPicker(openPicker === "dateFormat" ? null : "dateFormat")
+          }
+        >
+          {dateFormat}
+          {openPicker === "dateFormat" && (
+            <EnumPicker
+              options={dateFormatOptions}
+              current={dateFormat}
+              onSelect={(val) => {
+                setDateFormat(val)
                 setOpenPicker(null)
               }}
             />
