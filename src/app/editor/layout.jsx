@@ -57,7 +57,7 @@ export default function EditorLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-pastel-pink-500 flex flex-col">
+    <div className="min-h-screen min-w-[1200px] bg-pastel-pink-500 flex flex-col">
       {/* Navbar */}
       <header className="bg-carbon-blue-500 text-white w-full px-6 py-4 flex justify-between items-center">
         {/* Logo + App Name */}

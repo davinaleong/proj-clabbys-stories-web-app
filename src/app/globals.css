@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* Montserrat */
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/montserrat/Montserrat-VariableFont_wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/montserrat/Montserrat-Italic-VariableFont_wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+/* Playfair */
+@font-face {
+  font-family: "Playfair";
+  src: url("./assets/fonts/playfair/Playfair-VariableFont_opsz\,wdth\,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Playfair";
+  src: url("./assets/fonts/playfair/Playfair-Italic-VariableFont_opsz\,wdth\,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+}
+
 @theme inline {
   /* Pastel Pink Shades */
   --color-pastel-pink-50: #ffffff;
@@ -28,8 +62,8 @@
   --color-carbon-blue-950: #0b0b1e;
 
   /* Fonts */
-  --font-sans: var(--font-montserrat);
-  --font-serif: var(--font-playfair);
+  --font-sans: "Montserrat", sans-serif;
+  --font-serif: "Playfair", serif;
 }
 
 body {
