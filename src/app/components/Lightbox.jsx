@@ -1,11 +1,12 @@
 "use client"
 import { useEffect, useState } from "react"
 import { formatByEnum } from "./../lib/format-by-enum"
+import Image from "next/image"
+import iconX from "./../assets/icons/x-w.svg"
 
 export default function Lightbox({
   photo,
   onClose,
-  overlayMode,
   photos = [],
   slideshow = false,
   intervalMs = 7000,
@@ -20,11 +21,11 @@ export default function Lightbox({
     if (!slideshow || photos.length === 0) return
 
     const timer = setInterval(() => {
-      setFade(false) // start fade out
+      setFade(false)
       setTimeout(() => {
         setActiveIndex((prev) => (prev + 1) % photos.length)
-        setFade(true) // fade back in
-      }, 400) // duration must match CSS below
+        setFade(true)
+      }, 400)
     }, intervalMs)
 
     return () => clearInterval(timer)
@@ -72,7 +73,7 @@ export default function Lightbox({
           onClick={onClose}
           className="absolute top-4 right-4 text-white bg-black/50 px-3 py-1 rounded-md"
         >
-          ✕
+          <Image src={iconX} alt="Close" width={16} height={16} />
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { formatByEnum } from "./../lib/format-by-enum"
 import Lightbox from "./../components/Lightbox"
 
@@ -11,7 +11,8 @@ function normalizePhoto(p) {
   return { ...p, title, description, takenAt }
 }
 
-export default function GalleryView({ gallery, formatDateEnum, overlayMode }) {
+export default function GalleryView({ gallery, formatDateEnum }) {
+  console.log("Gallery", gallery)
   const [active, setActive] = useState(null)
 
   const photos = useMemo(() => {
@@ -20,6 +21,12 @@ export default function GalleryView({ gallery, formatDateEnum, overlayMode }) {
     )
     return sorted.map(normalizePhoto)
   }, [gallery?.photos])
+
+  useEffect(() => {
+    if (gallery?.lightboxMode === "SLIDESHOW" && photos.length > 0) {
+      setActive(null) // start with the first photo
+    }
+  }, [gallery?.lightboxMode, photos])
 
   return (
     <div className="min-h-[100svh] bg-pastel-pink-500 px-4 py-8">
@@ -58,13 +65,12 @@ export default function GalleryView({ gallery, formatDateEnum, overlayMode }) {
 
       {/* key ensures fresh mount when switching images (optional but nice) */}
       <Lightbox
-        key={active?.id || "none"}
+        key={active?.id || "slideshow"}
         photo={active}
         onClose={() => setActive(null)}
-        overlayMode={overlayMode}
-        photos={photos} // 🆕 pass whole array
+        photos={photos}
         slideshow={gallery?.lightboxMode === "SLIDESHOW"}
-        intervalMs={7000} // or make this configurable
+        intervalMs={7000}
         formatDateEnum={formatDateEnum}
       />
     </div>

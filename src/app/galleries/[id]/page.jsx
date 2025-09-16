@@ -20,6 +20,7 @@ const GET_GALLERY = gql`
       description
       date
       status
+      lightboxMode
       photos {
         id
         title
@@ -47,7 +48,6 @@ const GET_APP_SETTING_BY_ID = gql`
     appSetting(id: $id) {
       id
       applicationName
-      lightboxMode
       defaultSortOrder
       defaultDateFormat
     }
@@ -72,8 +72,7 @@ export default function GalleryPublicPage() {
   })
 
   const appSetting = settingsData?.appSetting
-  const appName = appSetting?.applicationName || "Clabby's Stories"
-  const overlayMode = appSetting?.lightboxMode || "BLACK"
+  const appName = appSetting?.applicationName || "C&G's Stories"
   const defaultDateFormat = appSetting?.defaultDateFormat || null
 
   useEffect(() => {
@@ -139,11 +138,5 @@ export default function GalleryPublicPage() {
     )
   }
 
-  return (
-    <GalleryView
-      gallery={gallery}
-      formatDateEnum={defaultDateFormat}
-      overlayMode={overlayMode}
-    />
-  )
+  return <GalleryView gallery={gallery} formatDateEnum={defaultDateFormat} />
 }
