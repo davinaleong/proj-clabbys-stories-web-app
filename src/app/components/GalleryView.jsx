@@ -1,19 +1,21 @@
+// GalleryView.jsx
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
 import { formatByEnum } from "./../lib/format-by-enum"
 import Lightbox from "./../components/Lightbox"
+import Slideshow from "./../components/Slideshow"
 
 function normalizePhoto(p) {
   const title = (p?.title ?? "").toString().trim()
   const description = (p?.description ?? "").toString().trim()
-  const takenAt = p?.takenAt ?? null // raw; Lightbox formats it
+  const takenAt = p?.takenAt ?? null
   return { ...p, title, description, takenAt }
 }
 
 export default function GalleryView({ gallery, formatDateEnum }) {
-  console.log("Gallery", gallery)
-  const [active, setActive] = useState(null)
+  const [active, setActive] = useState(null) // for Lightbox
+  const [showSlideshow, setShowSlideshow] = useState(false) // for Slideshow
 
   const photos = useMemo(() => {
     const sorted = [...(gallery?.photos || [])].sort(
@@ -22,9 +24,10 @@ export default function GalleryView({ gallery, formatDateEnum }) {
     return sorted.map(normalizePhoto)
   }, [gallery?.photos])
 
+  // auto-start slideshow if gallery is in slideshow mode
   useEffect(() => {
     if (gallery?.lightboxMode === "SLIDESHOW" && photos.length > 0) {
-      setActive(null) // start with the first photo
+      setShowSlideshow(true)
     }
   }, [gallery?.lightboxMode, photos])
 
@@ -46,12 +49,13 @@ export default function GalleryView({ gallery, formatDateEnum }) {
             "A curated collection of photos and memories — capturing laughter, love, and the little things that matter most."}
         </p>
 
+        {/* ✅ Grid of thumbnails (still visible even if slideshow exists) */}
         <div className="mt-4 flex flex-wrap gap-4">
           {photos.map((p) => (
             <button
               key={p.id}
               className="relative max-w-[150px] rounded-sm shadow-lg aspect-square overflow-hidden"
-              onClick={() => setActive(p)} // pass normalized photo w/ metadata
+              onClick={() => setActive(p)} // opens Lightbox
             >
               <img
                 src={p.imageUrl}
@@ -63,16 +67,26 @@ export default function GalleryView({ gallery, formatDateEnum }) {
         </div>
       </div>
 
-      {/* key ensures fresh mount when switching images (optional but nice) */}
-      <Lightbox
-        key={active?.id || "slideshow"}
-        photo={active}
-        onClose={() => setActive(null)}
-        photos={photos}
-        slideshow={gallery?.lightboxMode === "SLIDESHOW"}
-        intervalMs={7000}
-        formatDateEnum={formatDateEnum}
-      />
+      {/* 🖼 Manual Lightbox (only if a photo is clicked) */}
+      {active && (
+        <Lightbox
+          photo={active}
+          photos={photos}
+          formatDateEnum={formatDateEnum}
+          onClose={() => setActive(null)}
+        />
+      )}
+
+      {/* 🎞 Auto Slideshow (if mode = SLIDESHOW) */}
+      {showSlideshow && (
+        <Slideshow
+          gallery={gallery}
+          photos={photos}
+          intervalMs={7000}
+          formatDateEnum={formatDateEnum}
+          onClose={() => setShowSlideshow(false)} // exit slideshow
+        />
+      )}
     </div>
   )
 }

@@ -132,7 +132,7 @@ export default function GalleryPublicPage() {
 
   if (!gallery) {
     return (
-      <main className="flex justify-center items-center h-screen">
+      <main className="font-montserrat flex justify-center items-center h-screen">
         <p className="text-carbon-blue-700">Gallery not found.</p>
       </main>
     )
