@@ -46,6 +46,7 @@ const GET_GALLERY = gql`
       date
       status
       lightboxMode
+      spotifyPlaylistUrl
       createdAt
       photos {
         id
@@ -90,6 +91,7 @@ const UPDATE_GALLERY = gql`
       date
       status
       lightboxMode
+      spotifyPlaylistUrl
     }
   }
 `
@@ -181,6 +183,8 @@ export default function UpdateGalleryPage() {
   const [isStatusOpen, setStatusOpen] = useState(false)
   const [isPickerOpen, setPickerOpen] = useState(false)
 
+  const [editedSpotifyUrl, setEditedSpotifyUrl] = useState("")
+
   const [photos, setPhotos] = useState([])
 
   // ✅ Toast state
@@ -232,6 +236,7 @@ export default function UpdateGalleryPage() {
       if (g.lightboxMode) {
         setEditedLightbox(g.lightboxMode)
       }
+      if (g.spotifyPlaylistUrl) setEditedSpotifyUrl(g.spotifyPlaylistUrl)
 
       // Seed the modal with a reasonable default when opened
       setSeedPassphrase(env.DEFAULT_PASSPHRASE || passphraseGenerator())
@@ -300,6 +305,7 @@ export default function UpdateGalleryPage() {
         date: isoDate,
         status: editedStatus,
         lightboxMode: editedLightbox,
+        spotifyPlaylistUrl: editedSpotifyUrl || null,
       }
 
       // Save gallery details
@@ -556,6 +562,23 @@ export default function UpdateGalleryPage() {
             onBlur={(e) => setEditedDescription(e.currentTarget.textContent)}
           >
             {editedDescription}
+          </p>
+        </div>
+
+        {/* ✅ Spotify Playlist Field */}
+        <div className="text-gray-800 flex gap-2 relative mt-2">
+          <p className="min-w-[12.5ch]">
+            <strong>Spotify Playlist:</strong>
+          </p>
+          <p
+            className="text-gray-800 outline-none w-full truncate"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) =>
+              setEditedSpotifyUrl(e.currentTarget.textContent.trim())
+            }
+          >
+            {editedSpotifyUrl || "Paste Spotify playlist URL here"}
           </p>
         </div>
 
