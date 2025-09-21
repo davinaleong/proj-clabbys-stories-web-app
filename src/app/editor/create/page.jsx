@@ -17,6 +17,7 @@ const CREATE_GALLERY = gql`
       description
       date
       status
+      spotifyPlaylistUrl
     }
   }
 `
@@ -31,6 +32,7 @@ export default function CreateGalleryPage() {
   const [description, setDescription] = useState("No description provided.")
   const [prettyDate, setPrettyDate] = useState("No date is set")
   const [isoDateValue, setIsoDateValue] = useState(null)
+  const [spotifyUrl, setSpotifyUrl] = useState("")
 
   // ✅ Toast state
   const [toastMessage, setToastMessage] = useState("")
@@ -67,6 +69,7 @@ export default function CreateGalleryPage() {
         description: description.trim(),
         date: isoDateValue ?? null,
         status: "DRAFT",
+        spotifyPlaylistUrl: spotifyUrl.trim() || null,
       }
 
       const { data } = await createGalleryMutation({
@@ -156,6 +159,20 @@ export default function CreateGalleryPage() {
             onBlur={(e) => setDescription(e.currentTarget.textContent)}
           >
             {description}
+          </p>
+        </div>
+
+        <div className="text-gray-800 relative flex gap-2">
+          <p className="min-w-[12.5ch]">
+            <strong>Spotify Playlist:</strong>
+          </p>
+          <p
+            className="outline-none w-full truncate"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e) => setSpotifyUrl(e.currentTarget.textContent)}
+          >
+            {spotifyUrl || "Paste Spotify playlist URL here"}
           </p>
         </div>
 
