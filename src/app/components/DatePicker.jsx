@@ -69,9 +69,12 @@ export default function DatePicker({
     setStep("day")
   }
 
-  const handleDaySelect = (day) => {
+  const handleDaySelect = (day, year = selectedYear, month = selectedMonth) => {
+    setSelectedYear(year)
+    setSelectedMonth(month)
     setSelectedDay(day)
-    const finalDate = dayjs().year(selectedYear).month(selectedMonth).date(day)
+
+    const finalDate = dayjs().year(year).month(month).date(day)
 
     setPickedDate(finalDate)
 
@@ -84,6 +87,10 @@ export default function DatePicker({
     onClose()
   }
 
+  const handleTodaySelect = () => {
+    handleDaySelect(today.date(), today.year(), today.month())
+  }
+
   const daysInMonth =
     selectedYear !== null && selectedMonth !== null
       ? dayjs().year(selectedYear).month(selectedMonth).daysInMonth()
@@ -94,7 +101,7 @@ export default function DatePicker({
   return (
     <div
       ref={menuRef}
-      className="absolute mt-2 bg-white p-4 rounded-lg shadow-lg w-80 z-50"
+      className="absolute mt-2 bg-white p-4 rounded-sm-lg shadow-lg w-80 z-50"
       style={{
         top: anchorRef.current?.offsetHeight ?? 0,
         left: 0,
@@ -120,7 +127,7 @@ export default function DatePicker({
           <div className="flex justify-between items-center mb-2">
             <button
               onClick={() => setCurrentDecadeStart((prev) => prev - 10)}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-carbon-blue-500 hover:underline"
             >
               ← Prev
             </button>
@@ -129,7 +136,7 @@ export default function DatePicker({
             </span>
             <button
               onClick={() => setCurrentDecadeStart((prev) => prev + 10)}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-carbon-blue-500 hover:underline"
             >
               Next →
             </button>
@@ -139,7 +146,7 @@ export default function DatePicker({
               <button
                 key={year}
                 onClick={() => handleYearSelect(year)}
-                className="p-2 bg-neutral-100 rounded hover:bg-neutral-300"
+                className="p-2 bg-neutral-100 rounded-sm hover:bg-neutral-300"
               >
                 {year}
               </button>
@@ -154,7 +161,7 @@ export default function DatePicker({
           <div className="flex justify-between mb-2">
             <button
               onClick={() => setStep("year")}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-carbon-blue-500 hover:underline"
             >
               ← Years
             </button>
@@ -166,7 +173,7 @@ export default function DatePicker({
               <button
                 key={m}
                 onClick={() => handleMonthSelect(idx)}
-                className="p-2 bg-neutral-100 rounded hover:bg-neutral-300"
+                className="p-2 bg-neutral-100 rounded-sm hover:bg-neutral-300"
               >
                 {m}
               </button>
@@ -181,7 +188,7 @@ export default function DatePicker({
           <div className="flex justify-between mb-2">
             <button
               onClick={() => setStep("month")}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-carbon-blue-500 hover:underline"
             >
               ← Months
             </button>
@@ -190,12 +197,12 @@ export default function DatePicker({
             </div>
             <span></span>
           </div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1 mb-2">
             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
               <button
                 key={day}
                 onClick={() => handleDaySelect(day)}
-                className="p-2 bg-neutral-100 rounded hover:bg-neutral-300 text-sm"
+                className="p-2 bg-neutral-100 rounded-sm hover:bg-neutral-300 text-sm"
               >
                 {day}
               </button>
@@ -203,6 +210,16 @@ export default function DatePicker({
           </div>
         </>
       )}
+
+      {/* ✅ Today Button */}
+      <div className="mt-3 text-center">
+        <button
+          onClick={handleTodaySelect}
+          className="px-3 py-1 bg-carbon-blue-500 text-white rounded-sm hover:bg-carbon-blue-600 text-sm"
+        >
+          Today ({today.format("DD MMM YYYY")})
+        </button>
+      </div>
     </div>
   )
 }
