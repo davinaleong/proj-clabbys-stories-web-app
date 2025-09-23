@@ -21,6 +21,7 @@ const GET_GALLERY = gql`
       date
       status
       lightboxMode
+      spotifyPlaylistUrl
       photos {
         id
         title

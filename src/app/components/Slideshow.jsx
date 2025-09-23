@@ -7,6 +7,16 @@ import { formatByEnum } from "./../lib/format-by-enum"
 import iconChevronUp from "./../assets/icons/chevron-up.svg"
 import iconChevronDown from "./../assets/icons/chevron-down.svg"
 
+function toSpotifyEmbedUrl(url) {
+  if (!url) return null
+  return (
+    url.replace(
+      "open.spotify.com/playlist",
+      "open.spotify.com/embed/playlist"
+    ) + "?utm_source=generator&autoplay=1"
+  )
+}
+
 export default function Slideshow({
   gallery,
   photos = [],
@@ -72,7 +82,7 @@ export default function Slideshow({
 
       {/* 🖼 Slideshow Image */}
       <div className="flex flex-1 items-center justify-center">
-        <div className="relative max-w-4xl w-full">
+        <div className="relative max-w-5xl w-full">
           <img
             src={current.imageUrl}
             alt={current.title || ""}
@@ -97,6 +107,20 @@ export default function Slideshow({
           </div>
         </div>
       </div>
+
+      {/* 🎵 Spotify Player (only if gallery has playlist) */}
+      {gallery?.spotifyPlaylistUrl && (
+        <div className="w-full bg-black">
+          <iframe
+            src={toSpotifyEmbedUrl(gallery.spotifyPlaylistUrl)}
+            width="100%"
+            height="80"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          ></iframe>
+        </div>
+      )}
     </div>
   )
 }
