@@ -16,16 +16,6 @@ const SET_GALLERY_PASSPHRASE = gql`
   }
 `
 
-/**
- * PassphraseModal
- * Props:
- * - open: boolean
- * - onClose: () => void
- * - galleryId: string
- * - seed?: string             // initial input value
- * - onSaved?: (pass: string) => void
- * - generatePassphrase?: () => string
- */
 export default function PassphraseModal({
   open,
   onClose,
@@ -95,7 +85,7 @@ export default function PassphraseModal({
           <div className="flex gap-2">
             <button
               type="button"
-              className="inline-flex gap-2 px-3 py-2 rounded-sm bg-neutral-300 hover:bg-neutral-500"
+              className="inline-flex gap-2 px-3 py-2 rounded-sm bg-neutral-200 hover:bg-neutral-400"
               onClick={handleGenerate}
               title="Generate a random passphrase"
             >
