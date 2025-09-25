@@ -70,6 +70,11 @@ export default function FaqPage() {
           <li>
             <b>Blurred:</b> Uses a blurred version of the image as background.
           </li>
+          <li>
+            <b>Slideshow:</b> Displays photos one after another in sequence,
+            using a blurred version of the current image as the background while
+            transitioning smoothly to the next.
+          </li>
         </ul>
       ),
     },
